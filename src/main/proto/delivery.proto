@@ -1,0 +1,103 @@
+syntax = "proto3";
+
+package com.vasiliytemniy.grpc.delivery.service;
+
+
+service DeliveryService {
+  rpc createOrderTracking (CreateOrderTrackingRequest) returns (OrderTrackingResponse);
+  rpc getOrderTrackings (GetOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
+  rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
+  rpc setOrderTrackingStatus (SetOrderTrackingStatusRequest) returns (OrderTrackingResponse);
+  rpc calculateDeliveryCost (CalculateDeliveryCostRequest) returns (CalculateDeliveryCostResponse);
+}
+
+message OrderTrackingData {
+  int64 orderId = 1;
+  int32 pointNumber = 2;
+  int64 fromFacilityId = 3;
+  int64 destinationId = 4;
+  int64 carrierId = 5;
+  string status = 6;
+  int32 deliveryCost = 7;
+  string currency = 8;
+  string estimatedDeliveryAt = 9;
+  int32 massControlValue = 10;
+  string massMeasure = 11;
+  string deliveredAt = 12;
+  string createdAt = 13;
+  string updatedAt = 14;
+}
+
+// Requests
+
+message CreateOrderTrackingRequest {
+  int64 orderId = 1;
+  int64 fromFacilityId = 2;
+  int64 destinationId = 3;
+  int64 carrierId = 4;
+  string status = 5;
+  int32 deliveryCost = 7;
+  string currency = 8;
+  int32 massControlValue = 9;
+  string massMeasure = 10;
+}
+
+message GetOrderTrackingsRequest {
+  int64 orderId = 1;
+  string limit = 2;
+}
+
+message UpdateOrderTrackingRequest {
+  int64 orderId = 1;
+  int32 pointNumber = 2;
+  int64 fromFacilityId = 3;
+  int64 destinationId = 4;
+  int64 carrierId = 5;
+  string status = 6;
+  int32 deliveryCost = 7;
+  string currency = 8;
+  string estimatedDeliveryAt = 9;
+  int32 massControlValue = 10;
+  string massMeasure = 11;
+  string deliveredAt = 12;
+}
+
+message SetOrderTrackingStatusRequest {
+  int64 orderId = 1;
+  int32 pointNumber = 2;
+  string status = 3;
+  string deliveredAt = 4;
+}
+
+message CalculateDeliveryCostRequest {
+  string calculationType = 1;
+  int32 fixedCostAddon = 3;
+  int32 distanceStepCost = 4;
+  int32 distanceStepQuantity = 5;
+  string distanceStepMeasure = 6;
+  int32 massStepCost = 7;
+  int32 massStepQuantity = 8;
+  string massStepMeasure = 9;
+  int32 volumeStepCost = 10;
+  int32 volumeStepQuantity = 11;
+  string volumeStepMeasure = 12;
+  string fromAddress = 13;
+  string toAddress = 14;
+  int32 mass = 15;
+  int32 volume = 16;
+}
+
+
+// Responses
+
+message OrderTrackingResponse {
+  OrderTrackingData orderTracking = 1;
+}
+
+message ManyOrderTrackingsResponse {
+  repeated OrderTrackingData orderTrackings = 1;
+}
+
+message CalculateDeliveryCostResponse {
+  int32 cost = 1;
+}
