@@ -5,27 +5,30 @@ package com.vasiliytemniy.grpc.delivery.service;
 
 service DeliveryService {
   rpc createOrderTracking (CreateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc getOrderTrackings (GetOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
+  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsResponse);
+  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (ManyOrderTrackingsResponse);
   rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
   rpc setOrderTrackingStatus (SetOrderTrackingStatusRequest) returns (OrderTrackingResponse);
   rpc calculateDeliveryCost (CalculateDeliveryCostRequest) returns (CalculateDeliveryCostResponse);
 }
 
 message OrderTrackingData {
-  int64 orderId = 1;
-  int32 pointNumber = 2;
-  int64 fromFacilityId = 3;
-  int64 destinationId = 4;
-  int64 carrierId = 5;
-  string status = 6;
-  int32 deliveryCost = 7;
-  string currency = 8;
-  string estimatedDeliveryAt = 9;
-  int32 massControlValue = 10;
-  string massMeasure = 11;
-  string deliveredAt = 12;
-  string createdAt = 13;
-  string updatedAt = 14;
+  int64 id = 1;
+  int64 orderId = 2;
+  int32 pointNumber = 3;
+  int64 fromFacilityId = 4;
+  int64 destinationId = 5;
+  string destinationType = 6;
+  int64 carrierId = 7;
+  string status = 8;
+  int32 deliveryCost = 9;
+  string currency = 10;
+  int32 massControlValue = 11;
+  string massMeasure = 12;
+  string estimatedDeliveryAt = 13;
+  string deliveredAt = 14;
+  string createdAt = 15;
+  string updatedAt = 16;
 }
 
 // Requests
@@ -34,17 +37,29 @@ message CreateOrderTrackingRequest {
   int64 orderId = 1;
   int64 fromFacilityId = 2;
   int64 destinationId = 3;
-  int64 carrierId = 4;
-  string status = 5;
+  string destinationType = 4;
+  int64 carrierId = 5;
+  string status = 6;
   int32 deliveryCost = 7;
   string currency = 8;
   int32 massControlValue = 9;
   string massMeasure = 10;
+  string estimatedDeliveryAt = 11;
+  string deliveredAt = 12;
 }
 
-message GetOrderTrackingsRequest {
+message GetOrderTrackingsByOrderIdRequest {
   int64 orderId = 1;
-  string limit = 2;
+  int32 page = 2;
+  int32 size = 3;
+  bool findLast = 4;
+}
+
+message GetOrderTrackingsByCarrierIdRequest {
+  int64 carrierId = 1;
+  int32 page = 2;
+  int32 size = 3;
+  bool filterActive = 4;
 }
 
 message UpdateOrderTrackingRequest {
@@ -52,14 +67,15 @@ message UpdateOrderTrackingRequest {
   int32 pointNumber = 2;
   int64 fromFacilityId = 3;
   int64 destinationId = 4;
-  int64 carrierId = 5;
-  string status = 6;
-  int32 deliveryCost = 7;
-  string currency = 8;
-  string estimatedDeliveryAt = 9;
+  string destinationType = 5;
+  int64 carrierId = 6;
+  string status = 7;
+  int32 deliveryCost = 8;
+  string currency = 9;
   int32 massControlValue = 10;
   string massMeasure = 11;
-  string deliveredAt = 12;
+  string estimatedDeliveryAt = 12;
+  string deliveredAt = 13;
 }
 
 message SetOrderTrackingStatusRequest {
