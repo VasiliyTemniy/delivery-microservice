@@ -1,7 +1,9 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
+import java.util.*
+
 data class SuccessOrderTrackingResponse(
-    val id: Long?,
+    val id: UUID?,
     val orderId: Long?,
     val pointNumber: Int?,
     val fromFacilityId: Long?,

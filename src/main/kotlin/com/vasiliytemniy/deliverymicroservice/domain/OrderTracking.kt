@@ -8,15 +8,16 @@ import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.*
 import javax.validation.constraints.Size
 
 
 
 @Table(schema = "delivery", name = "order_tracking")
 data class OrderTracking(
-    @Column(ID) @Id var id: Long?,
+    @Column(ID) @Id var id: UUID?,
     @Column(ORDER_ID) var orderId: Long = 0,
-    @Column(POINT_NUMBER) var pointNumber: Int = 0,
+    @Column(POINT_NUMBER) var pointNumber: Int? = null,
     @Column(FROM_FACILITY_ID) var fromFacilityId: Long = 0,
     @Column(DESTINATION_ID) var destinationId: Long = 0,
     @get:Size(min = 3, max = 60) @Column(DESTINATION_TYPE) var destinationType: String = "",
@@ -54,9 +55,9 @@ data class OrderTracking(
 
 fun OrderTracking.toProto(): OrderTrackingData {
     return OrderTrackingData.newBuilder()
-        .setId(this.id?:0)
+        .setId(this.id.toString())
         .setOrderId(this.orderId)
-        .setPointNumber(this.pointNumber)
+        .setPointNumber(this.pointNumber?:0)
         .setFromFacilityId(this.fromFacilityId)
         .setDestinationId(this.destinationId)
         .setDestinationType(this.destinationType)
@@ -110,7 +111,7 @@ fun OrderTracking.Companion.of(request: com.vasiliytemniy.grpc.delivery.service.
     return OrderTracking(
         id = null,
         orderId = request.orderId,
-        pointNumber = 0,    // TODO: calculate point number based on other OrderTracking records for this order
+        pointNumber = null,
         fromFacilityId = request.fromFacilityId,
         destinationId = request.destinationId,
         destinationType = request.destinationType,
@@ -143,7 +144,7 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
     return OrderTracking(
         id = null,
         orderId = request.orderId,
-        pointNumber = 0,    // TODO: calculate point number based on other OrderTracking records for this order
+        pointNumber = null,
         fromFacilityId = request.fromFacilityId,
         destinationId = request.destinationId,
         destinationType = request.destinationType,
