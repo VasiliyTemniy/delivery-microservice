@@ -7,7 +7,6 @@ import org.springframework.data.domain.Pageable
 
 data class GetOrderTrackingsByOrderIdDto(
     val orderId: Long,
-    val findLast: Boolean,
     val pageable: Pageable
 ) {
     companion object
@@ -15,5 +14,5 @@ data class GetOrderTrackingsByOrderIdDto(
 
 
 fun GetOrderTrackingsByOrderIdDto.Companion.of(request: Delivery.GetOrderTrackingsByOrderIdRequest): GetOrderTrackingsByOrderIdDto {
-    return GetOrderTrackingsByOrderIdDto(request.orderId, request.findLast, PageRequest.of(request.page, request.size))
+    return GetOrderTrackingsByOrderIdDto(request.orderId, PageRequest.of(request.page, request.size))
 }
