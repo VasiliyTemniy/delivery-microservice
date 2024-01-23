@@ -13,7 +13,7 @@ service DeliveryService {
 }
 
 message OrderTrackingData {
-  int64 id = 1;
+  string id = 1;
   int64 orderId = 2;
   int32 pointNumber = 3;
   int64 fromFacilityId = 4;
