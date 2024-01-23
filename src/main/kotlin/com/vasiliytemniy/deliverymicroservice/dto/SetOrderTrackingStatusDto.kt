@@ -9,7 +9,7 @@ data class SetOrderTrackingStatusDto(
     val orderId: Long,
     val pointNumber: Int,
     val status: String,
-    val deliveredAt: String,
+    val deliveredAt: String?,
 ) {
     companion object
 }
