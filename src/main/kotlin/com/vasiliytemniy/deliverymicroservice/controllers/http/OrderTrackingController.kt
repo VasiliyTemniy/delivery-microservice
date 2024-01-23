@@ -3,10 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.controllers.http
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.domain.of
 import com.vasiliytemniy.deliverymicroservice.domain.toSuccessHttpResponse
-import com.vasiliytemniy.deliverymicroservice.dto.CreateOrderTrackingDto
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByCarrierIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByOrderIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.SuccessOrderTrackingResponse
+import com.vasiliytemniy.deliverymicroservice.dto.*
 import com.vasiliytemniy.deliverymicroservice.services.OrderTrackingService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -133,6 +130,24 @@ class OrderTrackingController(private val orderTrackingService: OrderTrackingSer
     ): Flow<SuccessOrderTrackingResponse> {
         return orderTrackingService.getOrderTrackingsByCarrierIdFlow(GetOrderTrackingsByCarrierIdDto(carrierId, PageRequest.of(page, size)))
             .map { it -> it.toSuccessHttpResponse().also { log.info("response: $it") } }
+    }
+
+    @PutMapping(path = ["/status/{orderId}/{pointNumber}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "setOrderTrackingStatus",
+        summary = "Set order tracking status",
+        operationId = "setOrderTrackingStatus",
+        description = "Set order tracking status"
+    )
+    suspend fun setOrderTrackingStatus(
+        @PathVariable(required = true) orderId: Long,
+        @PathVariable(required = true) pointNumber: Int,
+        @Valid @RequestBody req: SetOrderTrackingStatusDto
+    ) = withTimeout(TIMEOUT_MILLIS) {
+        ResponseEntity
+            .status(HttpStatus.OK)
+            .body(orderTrackingService.setOrderTrackingStatus(SetOrderTrackingStatusDto(orderId, pointNumber, req.status, req.deliveredAt)))
+            .also { log.info("set order tracking status: $req") }
     }
 
     companion object {
