@@ -16,19 +16,33 @@ CREATE TABLE IF NOT EXISTS delivery.order_trackings
     delivered_at           TIMESTAMP WITH TIME ZONE,
 
     created_at      TIMESTAMP WITH TIME ZONE    DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP WITH TIME ZONE    DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unique_order_point_pair UNIQUE (order_id, point_number),
+    updated_at      TIMESTAMP WITH TIME ZONE    DEFAULT CURRENT_TIMESTAMP
 );
 
--- Set the default value for point_number based on the existing records for the same order_id
-ALTER TABLE delivery.order_trackings
-    ALTER COLUMN point_number SET DEFAULT (
-        SELECT COALESCE(MAX(subquery.row_number), 0)
-        FROM (
-            SELECT ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY id) AS row_number
-            FROM delivery.order_trackings
-        ) AS subquery
-        WHERE subquery.order_id = order_trackings.order_id
-    );
+-- Calculate the default value for point_number based on the existing records for the same order_id
+CREATE OR REPLACE FUNCTION calculate_default_point_number()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS
+$func$
+BEGIN
+  NEW.point_number = COALESCE((
+    SELECT MAX(row_number)
+    FROM (
+      SELECT ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY id) AS row_number
+      FROM delivery.order_trackings
+      WHERE order_id = NEW.order_id
+    ) AS subquery
+  ), 0);
 
-CREATE INDEX IF NOT EXISTS order_trackings_order_id_point_number_idx ON delivery.order_trackings (order_id, point_number);
+  RETURN NEW;
+END;
+$func$;
+
+-- Set the default value for point_number based on the existing records for the same order_id
+CREATE TRIGGER set_default_point_number
+BEFORE INSERT ON delivery.order_trackings
+FOR EACH ROW
+EXECUTE FUNCTION calculate_default_point_number();
+
+-- Create a unique index on order_id and point_number
+CREATE UNIQUE INDEX IF NOT EXISTS order_trackings_order_id_point_number_idx ON delivery.order_trackings (order_id, point_number);
