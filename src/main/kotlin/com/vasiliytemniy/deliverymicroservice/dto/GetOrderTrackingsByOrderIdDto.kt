@@ -1,6 +1,6 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
-import com.vasiliytemniy.grpc.delivery.service.Delivery
+import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 
@@ -13,6 +13,6 @@ data class GetOrderTrackingsByOrderIdDto(
 }
 
 
-fun GetOrderTrackingsByOrderIdDto.Companion.of(request: Delivery.GetOrderTrackingsByOrderIdRequest): GetOrderTrackingsByOrderIdDto {
+fun GetOrderTrackingsByOrderIdDto.Companion.of(request: OrderTracking.GetOrderTrackingsByOrderIdRequest): GetOrderTrackingsByOrderIdDto {
     return GetOrderTrackingsByOrderIdDto(request.orderId, PageRequest.of(request.page, request.size))
 }
