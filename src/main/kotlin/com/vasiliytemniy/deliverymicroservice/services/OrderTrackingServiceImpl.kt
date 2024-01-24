@@ -30,14 +30,14 @@ class OrderTrackingServiceImpl(
         }
 
     @Transactional(readOnly = true)
-    override suspend fun getOrderTrackingsByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
+    override fun getOrderTrackingsByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findByOrderId(requestDto.orderId, requestDto.pageable)
             .collectList()
             .zipWith(this.orderTrackingReactiveRepository.count())
             .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
-    override suspend fun getOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
+    override fun getOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findByCarrierId(requestDto.carrierId, requestDto.pageable)
             .collectList()
             .zipWith(this.orderTrackingReactiveRepository.count())
@@ -52,13 +52,11 @@ class OrderTrackingServiceImpl(
         orderTrackingCoroutineRepository.findByCarrierIdFlow(requestDto.carrierId, requestDto.pageable)
 
     @Transactional(readOnly = true)
-    override suspend fun getLastOrderTrackingByOrderId(orderId: Long): Mono<OrderTracking>? =
-        withContext(Dispatchers.IO) {
-            orderTrackingReactiveRepository.findLastByOrderId(orderId)
-        }
+    override fun getLastOrderTrackingByOrderId(orderId: Long): Mono<OrderTracking>? =
+        orderTrackingReactiveRepository.findLastByOrderId(orderId)
 
     @Transactional(readOnly = true)
-    override suspend fun getActiveOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
+    override fun getActiveOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findActiveByCarrierId(requestDto.carrierId, requestDto.pageable)
             .buffer(requestDto.pageable.pageSize, (requestDto.pageable.pageNumber + 1))
             .elementAt(requestDto.pageable.pageNumber, ArrayList<OrderTracking>())
@@ -68,15 +66,13 @@ class OrderTrackingServiceImpl(
             .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional
-    override suspend fun setOrderTrackingStatus(requestDto: SetOrderTrackingStatusDto): Mono<OrderTracking> =
-        withContext(Dispatchers.IO) {
-            orderTrackingReactiveRepository.setOrderTrackingStatus(
-                requestDto.orderId,
-                requestDto.pointNumber,
-                requestDto.status,
-                requestDto.deliveredAt
-            )
-        }
+    override fun setOrderTrackingStatus(requestDto: SetOrderTrackingStatusDto): Mono<OrderTracking> =
+        orderTrackingReactiveRepository.setOrderTrackingStatus(
+            requestDto.orderId,
+            requestDto.pointNumber,
+            requestDto.status,
+            requestDto.deliveredAt
+        )
 
 //    companion object {
 //        private const val CREATE_ORDER_TRACKING = "OrderTrackingService.createOrderTracking"

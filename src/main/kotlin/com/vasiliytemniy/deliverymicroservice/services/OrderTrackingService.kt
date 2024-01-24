@@ -15,18 +15,18 @@ interface OrderTrackingService {
 
     suspend fun createOrderTracking(orderTracking: OrderTracking): OrderTracking
 
-    suspend fun getOrderTrackingsByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>>
+    fun getOrderTrackingsByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>>
 
-    suspend fun getOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>>
+    fun getOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>>
 
     fun getOrderTrackingsByOrderIdFlow(requestDto: GetOrderTrackingsByOrderIdDto): Flow<OrderTracking>
 
     fun getOrderTrackingsByCarrierIdFlow(requestDto: GetOrderTrackingsByCarrierIdDto): Flow<OrderTracking>
 
-    suspend fun getLastOrderTrackingByOrderId(orderId: Long): Mono<OrderTracking>?
+    fun getLastOrderTrackingByOrderId(orderId: Long): Mono<OrderTracking>?
 
-    suspend fun getActiveOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>>
+    fun getActiveOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>>
 
-    suspend fun setOrderTrackingStatus(requestDto: SetOrderTrackingStatusDto): Mono<OrderTracking>
+    fun setOrderTrackingStatus(requestDto: SetOrderTrackingStatusDto): Mono<OrderTracking>
 
 }
