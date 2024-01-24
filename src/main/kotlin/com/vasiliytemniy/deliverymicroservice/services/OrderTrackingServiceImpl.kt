@@ -61,7 +61,7 @@ class OrderTrackingServiceImpl(
     override suspend fun getActiveOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findActiveByCarrierId(requestDto.carrierId, requestDto.pageable)
             .buffer(requestDto.pageable.pageSize, (requestDto.pageable.pageNumber + 1))
-            .elementAt(requestDto.pageable.pageNumber,  ArrayList<OrderTracking>())
+            .elementAt(requestDto.pageable.pageNumber, ArrayList<OrderTracking>())
             .flatMapMany { Flux.fromIterable(it) }
             .collectList()
             .zipWith(this.orderTrackingReactiveRepository.count())
@@ -70,7 +70,12 @@ class OrderTrackingServiceImpl(
     @Transactional
     override suspend fun setOrderTrackingStatus(requestDto: SetOrderTrackingStatusDto): Mono<OrderTracking> =
         withContext(Dispatchers.IO) {
-            orderTrackingReactiveRepository.setOrderTrackingStatus(requestDto.orderId, requestDto.pointNumber, requestDto.status, requestDto.deliveredAt)
+            orderTrackingReactiveRepository.setOrderTrackingStatus(
+                requestDto.orderId,
+                requestDto.pointNumber,
+                requestDto.status,
+                requestDto.deliveredAt
+            )
         }
 
     companion object {
