@@ -33,6 +33,7 @@ class OrderTrackingReactiveController(
         @Valid @RequestBody req: CreateOrderTrackingDto
     ): Mono<OrderTracking> =
         orderTrackingReactiveService.createOrderTracking(OrderTracking.of(req))
+            .also { log.info("created order tracking: $req") }
 
     @GetMapping(path = ["/all/by-order-id/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -51,7 +52,7 @@ class OrderTrackingReactiveController(
                 orderId,
                 PageRequest.of(page, size)
             )
-        )
+        ).also { log.info("get order trackings by order id: $orderId, page $page, size $size") }
 
     @GetMapping(path = ["/all/by-carrier-id/{carrierId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -71,7 +72,7 @@ class OrderTrackingReactiveController(
                 carrierId,
                 PageRequest.of(page, size)
             ), filterActive
-        )
+        ).also { log.info("get order trackings by carrier id: $carrierId, page $page, size $size") }
 
     @GetMapping(path = ["/last/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -84,6 +85,7 @@ class OrderTrackingReactiveController(
         @PathVariable(required = true) orderId: Long
     ): Mono<OrderTracking>? =
         orderTrackingReactiveService.getLastOrderTrackingByOrderId(orderId)
+            .also { log.info("get last order tracking by order id: $orderId") }
 
     @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -96,6 +98,7 @@ class OrderTrackingReactiveController(
         @Valid @RequestBody req: SetOrderTrackingStatusesDto
     ): Flux<OrderTracking> =
         orderTrackingReactiveService.setOrderTrackingStatuses(req)
+            .also { log.info("set order tracking statuses: $req") }
 
     companion object {
         private val log = LoggerFactory.getLogger(OrderTrackingReactiveController::class.java)
