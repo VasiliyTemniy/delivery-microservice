@@ -2,7 +2,8 @@ package com.vasiliytemniy.deliverymicroservice.domain
 
 import com.vasiliytemniy.deliverymicroservice.dto.CreateOrderTrackingDto
 import com.vasiliytemniy.deliverymicroservice.dto.SuccessOrderTrackingResponse
-import com.vasiliytemniy.grpc.delivery.service.Delivery.OrderTrackingData
+import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.OrderTrackingData as OrderTrackingDataGrpc
+import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.CreateOrderTrackingRequest as CreateOrderTrackingRequestGrpc
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -25,6 +26,7 @@ data class OrderTracking(
     @get:Size(min = 3, max = 60) @Column(STATUS) var status: String = "",
     @Column(DELIVERY_COST) var deliveryCost: Int = 0,
     @get:Size(min = 3, max = 3) @Column(CURRENCY) var currency: String = "",
+    @Column(CURRENCY_DECIMAL_MULTIPLIER) var currencyDecimalMultiplier: Int = 1,
     @Column(MASS_CONTROL_VALUE) var massControlValue: Int? = null,
     @get:Size(min = 1, max = 60) @Column(MASS_MEASURE) var massMeasure: String? = null,
     @Column(ESTIMATED_DELIVERY_AT) var estimatedDeliveryAt: LocalDateTime? = null,
@@ -44,6 +46,7 @@ data class OrderTracking(
         const val STATUS = "status"
         const val DELIVERY_COST = "delivery_cost"
         const val CURRENCY = "currency"
+        const val CURRENCY_DECIMAL_MULTIPLIER = "currency_decimal_multiplier"
         const val ESTIMATED_DELIVERY_AT = "estimated_delivery_at"
         const val MASS_CONTROL_VALUE = "mass_control_value"
         const val MASS_MEASURE = "mass_measure"
@@ -53,8 +56,8 @@ data class OrderTracking(
     }
 }
 
-fun OrderTracking.toProto(): OrderTrackingData {
-    return OrderTrackingData.newBuilder()
+fun OrderTracking.toProto(): OrderTrackingDataGrpc {
+    return OrderTrackingDataGrpc.newBuilder()
         .setId(this.id.toString())
         .setOrderId(this.orderId)
         .setPointNumber(this.pointNumber?:0)
@@ -65,6 +68,7 @@ fun OrderTracking.toProto(): OrderTrackingData {
         .setStatus(this.status)
         .setDeliveryCost(this.deliveryCost)
         .setCurrency(this.currency)
+        .setCurrencyDecimalMultiplier(this.currencyDecimalMultiplier)
         .setMassControlValue(this.massControlValue?:0)
         .setMassMeasure(this.massMeasure)
         .setEstimatedDeliveryAt(this.estimatedDeliveryAt.toString())
@@ -86,6 +90,7 @@ fun OrderTracking.toSuccessHttpResponse(): SuccessOrderTrackingResponse {
         status = this.status,
         deliveryCost = this.deliveryCost,
         currency = this.currency,
+        currencyDecimalMultiplier = this.currencyDecimalMultiplier,
         massControlValue = this.massControlValue,
         massMeasure = this.massMeasure,
         estimatedDeliveryAt = this.estimatedDeliveryAt.toString(),
@@ -95,18 +100,20 @@ fun OrderTracking.toSuccessHttpResponse(): SuccessOrderTrackingResponse {
     )
 }
 
-fun OrderTracking.Companion.of(request: com.vasiliytemniy.grpc.delivery.service.Delivery.CreateOrderTrackingRequest): OrderTracking {
+fun OrderTracking.Companion.of(request: CreateOrderTrackingRequestGrpc): OrderTracking {
 
-    val parsedEstimatedDeliveryAt = if (request.estimatedDeliveryAt == null) {
-        null // TODO: calculate estimated delivery time if null
-    } else {
-        LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
-    }
-    val parsedDeliveredAt = if (request.deliveredAt == null) {
-        null
-    } else {
-        LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
-    }
+    val parsedEstimatedDeliveryAt =
+        if (request.estimatedDeliveryAt == null || request.estimatedDeliveryAt == "" || request.estimatedDeliveryAt == "null") {
+            null
+        } else {
+            LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
+        }
+    val parsedDeliveredAt =
+        if (request.deliveredAt == null || request.deliveredAt == "" || request.deliveredAt == "null") {
+            null
+        } else {
+            LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
+        }
 
     return OrderTracking(
         id = null,
@@ -119,6 +126,7 @@ fun OrderTracking.Companion.of(request: com.vasiliytemniy.grpc.delivery.service.
         status = request.status,
         deliveryCost = request.deliveryCost,
         currency = request.currency,
+        currencyDecimalMultiplier = request.currencyDecimalMultiplier,
         massControlValue = request.massControlValue,
         massMeasure = request.massMeasure,
         estimatedDeliveryAt = parsedEstimatedDeliveryAt,
@@ -130,16 +138,18 @@ fun OrderTracking.Companion.of(request: com.vasiliytemniy.grpc.delivery.service.
 
 fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
 
-    val parsedEstimatedDeliveryAt = if (request.estimatedDeliveryAt == null) {
-        null // TODO: calculate estimated delivery time if null
-    } else {
-        LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
-    }
-    val parsedDeliveredAt = if (request.deliveredAt == null) {
-        null
-    } else {
-        LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
-    }
+    val parsedEstimatedDeliveryAt =
+        if (request.estimatedDeliveryAt == null || request.estimatedDeliveryAt == "" || request.estimatedDeliveryAt == "null") {
+            null
+        } else {
+            LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
+        }
+    val parsedDeliveredAt =
+        if (request.deliveredAt == null || request.deliveredAt == "" || request.deliveredAt == "null") {
+            null
+        } else {
+            LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
+        }
 
     return OrderTracking(
         id = null,
@@ -152,6 +162,7 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
         status = request.status,
         deliveryCost = request.deliveryCost,
         currency = request.currency,
+        currencyDecimalMultiplier = request.currencyDecimalMultiplier,
         massControlValue = request.massControlValue,
         massMeasure = request.massMeasure,
         estimatedDeliveryAt = parsedEstimatedDeliveryAt,
