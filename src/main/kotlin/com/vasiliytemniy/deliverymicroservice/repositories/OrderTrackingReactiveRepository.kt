@@ -1,8 +1,16 @@
 package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
-import com.vasiliytemniy.deliverymicroservice.repositories.LongSqlQueries.Companion.ORDER_TRACKING_UPDATE_SQL_QUERY
-import com.vasiliytemniy.deliverymicroservice.repositories.LongSqlQueries.Companion.SET_ORDER_TRACKING_STATUS_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.DELETE_ORDER_TRACKING_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_ALL_BY_CARRIER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_ALL_BY_ORDER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_LAST_BY_ORDER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_PAGE_ACTIVE_BY_CARRIER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_PAGE_BY_CARRIER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.FIND_PAGE_BY_ORDER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.SET_ORDER_TRACKING_STATUS_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.UPDATE_ORDER_TRACKING_SQL_QUERY
 import org.springframework.data.domain.Pageable
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
@@ -14,33 +22,25 @@ import reactor.core.publisher.Mono
 @Repository
 interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking, Long> {
 
-    //    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId")
+    @Query(FIND_PAGE_BY_ORDER_ID_SQL_QUERY)
     fun findPageByOrderId(orderId: Long, pageable: Pageable): Flux<OrderTracking>
 
-    //    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId")
+    @Query(FIND_ALL_BY_ORDER_ID_SQL_QUERY)
     fun findAllByOrderId(orderId: Long): Flux<OrderTracking>
 
-    //    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId")
-    fun findPageByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
-
-    //    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId")
-    fun findAllByCarrierId(carrierId: Long): Flux<OrderTracking>
-
-    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId ORDER BY point_number DESC LIMIT 1")
+    @Query(FIND_LAST_BY_ORDER_ID_SQL_QUERY)
     fun findLastByOrderId(orderId: Long): Mono<OrderTracking>
 
-    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId AND delivered_at IS NULL")
+    @Query(FIND_PAGE_BY_CARRIER_ID_SQL_QUERY)
+    fun findPageByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
+
+    @Query(FIND_ALL_BY_CARRIER_ID_SQL_QUERY)
+    fun findAllByCarrierId(carrierId: Long): Flux<OrderTracking>
+
+    @Query(FIND_PAGE_ACTIVE_BY_CARRIER_ID_SQL_QUERY)
     fun findPageActiveByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
 
-    @Query(SET_ORDER_TRACKING_STATUS_SQL_QUERY)
-    fun setOrderTrackingStatus(
-        orderId: Long,
-        pointNumber: Int,
-        status: String,
-        deliveredAt: String?
-    ): Mono<OrderTracking>
-
-    @Query(ORDER_TRACKING_UPDATE_SQL_QUERY)
+    @Query(UPDATE_ORDER_TRACKING_SQL_QUERY)
     fun updateOrderTracking(
         orderId: Long,
         pointNumber: Int,
@@ -58,10 +58,18 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
         deliveredAt: String?
     ): Mono<OrderTracking>
 
-    @Query("DELETE FROM order_trackings WHERE order_id = :orderId")
+    @Query(SET_ORDER_TRACKING_STATUS_SQL_QUERY)
+    fun setOrderTrackingStatus(
+        orderId: Long,
+        pointNumber: Int,
+        status: String,
+        deliveredAt: String?
+    ): Mono<OrderTracking>
+
+    @Query(DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY)
     fun deleteAllByOrderId(orderId: Long): Mono<Void>
 
-    @Query("DELETE FROM order_trackings WHERE order_id = :orderId AND point_number = :pointNumber")
+    @Query(DELETE_ORDER_TRACKING_SQL_QUERY)
     fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<Void>
 
 }
