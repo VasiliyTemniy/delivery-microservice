@@ -12,6 +12,7 @@ data class CreateOrderTrackingDto (
     val status: String,
     val deliveryCost: Int,
     val currency: String,
+    val currencyDecimalMultiplier: Int,
     val massControlValue: Int?,
     val massMeasure: String?,
     val estimatedDeliveryAt: String?,
