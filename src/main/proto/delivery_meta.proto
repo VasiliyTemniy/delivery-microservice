@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package com.vasiliytemniy.grpc.deliverymeta.service;
+
+
+service DeliveryMetaService {
+  rpc calculateDeliveryMeta (CalculateDeliveryMetaRequest) returns (CalculateDeliveryMetaResponse);
+}
+
+// Currency is not needed here - cost calculation is abstract for given costs
+message DeliveryCostParams {
+  string calculationType = 1; // "fixed", "distance", "mass", "volume"
+  optional int32 fixedCostAddon = 3;
+  optional int32 distanceStepCost = 4;
+  optional int32 distanceStepQuantity = 5;
+  optional string distanceStepMeasure = 6;
+  optional int32 massStepCost = 7;
+  optional int32 massStepQuantity = 8;
+  optional string massStepMeasure = 9;
+  optional int32 volumeStepCost = 10;
+  optional int32 volumeStepQuantity = 11;
+  optional string volumeStepMeasure = 12;
+  optional string fromAddress = 13;
+  optional string toAddress = 14;
+  optional int32 mass = 15;
+  optional int32 volume = 16;
+}
+
+// Params for estimated delivery time calculation
+message DeliveryTimeParams {
+  string deliveryVehicleType = 1;
+  int32 estimatedDispatchTimeDeltaMs = 2;
+  int32 estimatedDestinationTimeDeltaMs = 3;
+  optional int32 estimatedVehicleMedianSpeedKmH = 4;
+}
+
+
+// Requests
+
+message CalculateDeliveryMetaRequest {
+  string metaCalculationType = 1; // "onlyCost", "onlyEstimatedTime", "costAndEstimatedTime"
+  optional DeliveryCostParams deliveryCostParams = 2;
+  optional DeliveryTimeParams deliveryTimeParams = 3;
+}
+
+
+// Responses
+
+message CalculateDeliveryMetaResponse {
+  string error = 1; // go-style error as value
+  optional int32 cost = 2;
+  optional string expectedDeliveryAt = 3;
+}
