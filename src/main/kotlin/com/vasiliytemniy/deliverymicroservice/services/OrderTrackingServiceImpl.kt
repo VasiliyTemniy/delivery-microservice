@@ -78,7 +78,7 @@ class OrderTrackingServiceImpl(
             )
         }
 
-    companion object {
-        private const val CREATE_ORDER_TRACKING = "OrderTrackingService.createOrderTracking"
-    }
+//    companion object {
+//        private const val CREATE_ORDER_TRACKING = "OrderTrackingService.createOrderTracking"
+//    }
 }

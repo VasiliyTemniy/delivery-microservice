@@ -1,7 +1,5 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
-import java.time.LocalDateTime
-import javax.validation.constraints.Size
 
 data class CreateOrderTrackingDto (
     val orderId: Long,
