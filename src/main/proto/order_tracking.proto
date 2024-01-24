@@ -5,10 +5,11 @@ package com.vasiliytemniy.grpc.ordertracking.service;
 
 service OrderTrackingService {
   rpc createOrderTracking (CreateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsResponse);
-  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (ManyOrderTrackingsResponse);
+  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
+  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
   rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc setOrderTrackingStatus (SetOrderTrackingStatusRequest) returns (OrderTrackingResponse);
+  rpc setOrderTrackingStatus (SetOrderTrackingStatusRequest) returns (ManyOrderTrackingsResponse);
+  rpc reorderOrderTrackings (ReorderOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
 }
 
 message OrderTrackingData {
@@ -29,6 +30,12 @@ message OrderTrackingData {
   string deliveredAt = 15;
   string createdAt = 16;
   string updatedAt = 17;
+}
+
+// External identifier
+message OrderTrackingIdentifier {
+  int64 orderId = 1;
+  int32 pointNumber = 2;
 }
 
 // Requests
@@ -81,10 +88,14 @@ message UpdateOrderTrackingRequest {
 }
 
 message SetOrderTrackingStatusRequest {
-  int32 pointNumber = 1;
-  string status = 2;
-  string deliveredAt = 3;
-  repeated int64 orderIds = 4; // An array to be able to set multiple orders if many orders are delivered at the same time
+  string status = 1;
+  string deliveredAt = 2;
+  repeated OrderTrackingIdentifier orderTrackingIdentifiers = 3; // An array to be able to set multiple orders statuses if many orders are delivered at the same time
+}
+
+message ReorderOrderTrackingsRequest {
+  int64 orderId = 1;
+  map<int32, int32> fromPointNumberToPointNumber = 2;
 }
 
 
@@ -96,4 +107,14 @@ message OrderTrackingResponse {
 
 message ManyOrderTrackingsResponse {
   repeated OrderTrackingData orderTrackings = 1;
+}
+
+message ManyOrderTrackingsWithPaginationResponse {
+  repeated OrderTrackingData orderTrackings = 1;
+  int32 page = 2;
+  int32 size = 3;
+  int32 totalElements = 4;
+  int32 totalPages = 5;
+  bool isFirst = 6;
+  bool isLast = 7;
 }
