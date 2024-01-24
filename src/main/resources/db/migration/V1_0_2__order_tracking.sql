@@ -45,5 +45,23 @@ BEFORE INSERT ON delivery.order_trackings
 FOR EACH ROW
 EXECUTE FUNCTION calculate_default_point_number();
 
+
+-- Update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_timestamp()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS
+$func$
+BEGIN
+    NEW.updated_at = transaction_timestamp();
+    RETURN NEW;
+END;
+$func$;
+
+CREATE TRIGGER update_order_trackings_modtime
+BEFORE UPDATE ON delivery.order_trackings
+FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
+
 -- Create a unique index on order_id and point_number
 CREATE UNIQUE INDEX IF NOT EXISTS order_trackings_order_id_point_number_idx ON delivery.order_trackings (order_id, point_number);
