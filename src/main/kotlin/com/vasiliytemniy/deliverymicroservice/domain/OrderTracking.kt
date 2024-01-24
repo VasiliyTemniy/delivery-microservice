@@ -13,7 +13,7 @@ import javax.validation.constraints.Size
 
 
 
-@Table(schema = "delivery", name = "order_tracking")
+@Table(schema = "delivery", name = "order_trackings")
 data class OrderTracking(
     @Column(ID) @Id var id: UUID?,
     @Column(ORDER_ID) var orderId: Long = 0,

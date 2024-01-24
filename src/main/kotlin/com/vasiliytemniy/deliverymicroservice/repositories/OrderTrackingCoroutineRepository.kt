@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository
 @Repository
 interface OrderTrackingCoroutineRepository: CoroutineCrudRepository<OrderTracking, Long> {
 
-    @Query("SELECT * FROM order_tracking WHERE order_id = :orderId")
+    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId")
     fun findByOrderIdFlow(orderId: Long, pageable: Pageable): Flow<OrderTracking>
 
-    @Query("SELECT * FROM order_tracking WHERE carrier_id = :carrierId")
+    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId")
     fun findByCarrierIdFlow(carrierId: Long, pageable: Pageable): Flow<OrderTracking>
 
 }

@@ -12,19 +12,19 @@ import reactor.core.publisher.Mono
 @Repository
 interface OrderTrackingReactiveRepository: ReactiveCrudRepository<OrderTracking, Long> {
 
-//    @Query("SELECT * FROM order_tracking WHERE order_id = :orderId")
+//    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId")
     fun findByOrderId(orderId: Long, pageable: Pageable): Flux<OrderTracking>
 
-//    @Query("SELECT * FROM order_tracking WHERE carrier_id = :carrierId")
+//    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId")
     fun findByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
 
-    @Query("SELECT * FROM order_tracking WHERE order_id = :orderId ORDER BY point_number DESC LIMIT 1")
+    @Query("SELECT * FROM order_trackings WHERE order_id = :orderId ORDER BY point_number DESC LIMIT 1")
     fun findLastByOrderId(orderId: Long): Mono<OrderTracking>
 
-    @Query("SELECT * FROM order_tracking WHERE carrier_id = :carrierId AND delivered_at IS NULL")
+    @Query("SELECT * FROM order_trackings WHERE carrier_id = :carrierId AND delivered_at IS NULL")
     fun findActiveByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
 
-    @Query("UPDATE order_tracking SET  status = :status, delivered_at = :deliveredAt WHERE order_id = :orderId, point_number = :pointNumber")
+    @Query("UPDATE order_trackings SET status = :status, delivered_at = :deliveredAt WHERE order_id = :orderId, point_number = :pointNumber")
     fun setOrderTrackingStatus(orderId: Long, pointNumber: Int, status: String, deliveredAt: String?): Mono<OrderTracking>
 
 }
