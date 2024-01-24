@@ -84,7 +84,7 @@ message SetOrderTrackingStatusRequest {
   int32 pointNumber = 1;
   string status = 2;
   string deliveredAt = 3;
-  repeated int64 orderId = 4; // An array to be able to set multiple orders if many orders are delivered at the same time
+  repeated int64 orderIds = 4; // An array to be able to set multiple orders if many orders are delivered at the same time
 }
 
 
