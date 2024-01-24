@@ -94,8 +94,12 @@ message SetOrderTrackingStatusesRequest {
 }
 
 message ReorderOrderTrackingsRequest {
+  message MapFieldEntry {
+    int32 key = 1;
+    int32 value = 2;
+  }
   int64 orderId = 1;
-  map<int32, int32> fromPointNumberToPointNumber = 2;
+  repeated MapFieldEntry fromPointNumberToPointNumber = 2;
 }
 
 
