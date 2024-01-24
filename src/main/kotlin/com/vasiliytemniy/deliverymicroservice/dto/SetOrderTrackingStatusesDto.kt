@@ -3,7 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.dto
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
 
 
-data class SetOrderTrackingStatusDto(
+data class SetOrderTrackingStatusesDto(
     val orderTrackingIdentifiers: List<OrderTrackingIdentifierDto>,
     val status: String,
     val deliveredAt: String?,
@@ -17,10 +17,10 @@ data class SetOrderTrackingStatusDto(
 }
 
 
-fun SetOrderTrackingStatusDto.Companion.of(request: OrderTracking.SetOrderTrackingStatusRequest): SetOrderTrackingStatusDto {
+fun SetOrderTrackingStatusesDto.Companion.of(request: OrderTracking.SetOrderTrackingStatusesRequest): SetOrderTrackingStatusesDto {
 
     val orderTrackingIdentifiers = request.orderTrackingIdentifiersList.toList()
         .map { OrderTrackingIdentifierDto.of(it) }
 
-    return SetOrderTrackingStatusDto(orderTrackingIdentifiers, request.status, request.deliveredAt)
+    return SetOrderTrackingStatusesDto(orderTrackingIdentifiers, request.status, request.deliveredAt)
 }

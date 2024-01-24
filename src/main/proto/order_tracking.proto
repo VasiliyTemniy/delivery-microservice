@@ -8,7 +8,7 @@ service OrderTrackingService {
   rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
   rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
   rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc setOrderTrackingStatus (SetOrderTrackingStatusRequest) returns (ManyOrderTrackingsResponse);
+  rpc setOrderTrackingStatus (SetOrderTrackingStatusesRequest) returns (ManyOrderTrackingsResponse);
   rpc reorderOrderTrackings (ReorderOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
 }
 
@@ -87,7 +87,7 @@ message UpdateOrderTrackingRequest {
   string deliveredAt = 14;
 }
 
-message SetOrderTrackingStatusRequest {
+message SetOrderTrackingStatusesRequest {
   string status = 1;
   string deliveredAt = 2;
   repeated OrderTrackingIdentifier orderTrackingIdentifiers = 3; // An array to be able to set multiple orders statuses if many orders are delivered at the same time
