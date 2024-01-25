@@ -5,11 +5,14 @@ package com.vasiliytemniy.grpc.ordertracking.service;
 
 service OrderTrackingService {
   rpc createOrderTracking (CreateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
-  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (ManyOrderTrackingsWithPaginationResponse);
+  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (stream ManyOrderTrackingsWithPaginationResponse);
+  rpc getLastOrderTrackingByOrderId (GetLastOrderTrackingByOrderIdRequest) returns (OrderTrackingResponse);
+  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (stream ManyOrderTrackingsWithPaginationResponse);
   rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc setOrderTrackingStatus (SetOrderTrackingStatusesRequest) returns (ManyOrderTrackingsResponse);
+  rpc setOrderTrackingStatuses (SetOrderTrackingStatusesRequest) returns (ManyOrderTrackingsResponse);
   rpc reorderOrderTrackings (ReorderOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
+  rpc deleteOrderTrackingsByOrderId (DeleteOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsResponse);
+  rpc deleteByOrderTrackingIdentifier (DeleteByOrderTrackingIdentifierRequest) returns (OrderTrackingResponse);
 }
 
 message OrderTrackingData {
@@ -60,7 +63,6 @@ message GetOrderTrackingsByOrderIdRequest {
   int64 orderId = 1;
   int32 page = 2;
   int32 size = 3;
-  bool findLast = 4;
 }
 
 message GetOrderTrackingsByCarrierIdRequest {
@@ -68,6 +70,10 @@ message GetOrderTrackingsByCarrierIdRequest {
   int32 page = 2;
   int32 size = 3;
   bool filterActive = 4;
+}
+
+message GetLastOrderTrackingByOrderIdRequest {
+  int64 orderId = 1;
 }
 
 message UpdateOrderTrackingRequest {
@@ -102,6 +108,15 @@ message ReorderOrderTrackingsRequest {
   repeated MapFieldEntry fromPointNumberToPointNumber = 2;
 }
 
+message DeleteOrderTrackingsByOrderIdRequest {
+  int64 orderId = 1;
+}
+
+message DeleteByOrderTrackingIdentifierRequest {
+  int64 orderId = 1;
+  int32 pointNumber = 2;
+}
+
 
 // Responses
 
@@ -110,11 +125,11 @@ message OrderTrackingResponse {
 }
 
 message ManyOrderTrackingsResponse {
-  repeated OrderTrackingData orderTrackings = 1;
+  repeated OrderTrackingData orderTracking = 1;
 }
 
 message ManyOrderTrackingsWithPaginationResponse {
-  repeated OrderTrackingData orderTrackings = 1;
+  repeated OrderTrackingData orderTracking = 1;
   int32 page = 2;
   int32 size = 3;
   int32 totalElements = 4;
