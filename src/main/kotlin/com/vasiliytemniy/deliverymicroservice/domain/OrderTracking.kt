@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.domain
 
 import com.vasiliytemniy.deliverymicroservice.dto.CreateOrderTrackingDto
 import com.vasiliytemniy.deliverymicroservice.dto.SuccessOrderTrackingResponse
+import jakarta.validation.constraints.Size
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.OrderTrackingData as OrderTrackingDataGrpc
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.CreateOrderTrackingRequest as CreateOrderTrackingRequestGrpc
 import org.springframework.data.annotation.Id
@@ -10,7 +11,6 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import javax.validation.constraints.Size
 
 
 
