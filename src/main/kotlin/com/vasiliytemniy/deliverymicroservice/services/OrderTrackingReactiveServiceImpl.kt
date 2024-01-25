@@ -6,13 +6,13 @@ import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByOrderIdDto
 import com.vasiliytemniy.deliverymicroservice.dto.SetOrderTrackingStatusesDto
 import com.vasiliytemniy.deliverymicroservice.dto.UpdateOrderTrackingDto
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingReactiveRepository
+import jakarta.validation.Valid
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import javax.validation.Valid
 
 @Service
 class OrderTrackingReactiveServiceImpl(
@@ -79,4 +79,12 @@ class OrderTrackingReactiveServiceImpl(
             requestDto.estimatedDeliveryAt,
             requestDto.deliveredAt
         )
+
+    @Transactional
+    override fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking> =
+        orderTrackingReactiveRepository.deleteAllByOrderId(orderId)
+
+    @Transactional
+    override fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<OrderTracking> =
+        orderTrackingReactiveRepository.deleteByOrderTrackingIdentifier(orderId, pointNumber)
 }

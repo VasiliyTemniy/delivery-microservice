@@ -6,12 +6,12 @@ import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByOrderIdDto
 import com.vasiliytemniy.deliverymicroservice.dto.SetOrderTrackingStatusesDto
 import com.vasiliytemniy.deliverymicroservice.dto.UpdateOrderTrackingDto
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingCoroutineRepository
+import jakarta.validation.Valid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import javax.validation.Valid
 
 @Service
 class OrderTrackingCoroutineServiceImpl(
@@ -75,5 +75,17 @@ class OrderTrackingCoroutineServiceImpl(
                 requestDto.estimatedDeliveryAt,
                 requestDto.deliveredAt
             )
+        }
+
+    @Transactional
+    override suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking> =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.deleteAllByOrderId(orderId)
+        }
+
+    @Transactional
+    override suspend fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int) =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.deleteByOrderTrackingIdentifier(orderId, pointNumber)
         }
 }
