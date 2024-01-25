@@ -80,12 +80,14 @@ class SqlQueries {
             DELETE FROM order_trackings
             WHERE
                 order_id = :orderId
+            RETURNING *
         """
 
         const val DELETE_ORDER_TRACKING_SQL_QUERY = """
             DELETE FROM order_trackings
             WHERE
                 order_id = :orderId, point_number = :pointNumber
+            RETURNING *
         """
     }
 
