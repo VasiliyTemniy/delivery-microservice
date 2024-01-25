@@ -67,9 +67,9 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
     ): Mono<OrderTracking>
 
     @Query(DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY)
-    fun deleteAllByOrderId(orderId: Long): Mono<Void>
+    fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking>
 
     @Query(DELETE_ORDER_TRACKING_SQL_QUERY)
-    fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<Void>
+    fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<OrderTracking>
 
 }

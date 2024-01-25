@@ -66,9 +66,9 @@ interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracki
     ): OrderTracking
 
     @Query(DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY)
-    suspend fun deleteAllByOrderId(orderId: Long): Unit
+    suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking>
 
     @Query(DELETE_ORDER_TRACKING_SQL_QUERY)
-    suspend fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Unit
+    suspend fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): OrderTracking
 
 }
