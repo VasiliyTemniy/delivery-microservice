@@ -26,4 +26,8 @@ interface OrderTrackingReactiveService {
 
     fun updateOrderTracking(requestDto: UpdateOrderTrackingDto): Mono<OrderTracking>
 
+    fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking>
+
+    fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<OrderTracking>
+
 }

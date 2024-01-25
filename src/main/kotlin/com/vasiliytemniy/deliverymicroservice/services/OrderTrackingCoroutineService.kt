@@ -24,4 +24,8 @@ interface OrderTrackingCoroutineService {
 
     suspend fun updateOrderTracking(requestDto: UpdateOrderTrackingDto): OrderTracking?
 
+    suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking>
+
+    suspend fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): OrderTracking
+
 }
