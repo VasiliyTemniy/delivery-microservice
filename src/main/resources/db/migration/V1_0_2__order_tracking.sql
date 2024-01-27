@@ -26,6 +26,10 @@ CREATE OR REPLACE FUNCTION calculate_default_point_number()
     LANGUAGE plpgsql AS
 $func$
 BEGIN
+  IF NEW.point_number IS NOT NULL THEN
+    RETURN NEW;
+  END IF;
+
   NEW.point_number = COALESCE((
     SELECT MAX(row_number)
     FROM (
