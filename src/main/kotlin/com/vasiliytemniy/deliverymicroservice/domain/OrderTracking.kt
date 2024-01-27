@@ -105,7 +105,7 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingRequestGrpc): OrderTr
     return OrderTracking(
         id = null,
         orderId = request.orderId,
-        pointNumber = null,
+        pointNumber = request.pointNumber,
         fromFacilityId = request.fromFacilityId,
         destinationId = request.destinationId,
         destinationType = request.destinationType,
@@ -127,7 +127,7 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
     return OrderTracking(
         id = null,
         orderId = request.orderId,
-        pointNumber = null,
+        pointNumber = request.pointNumber,
         fromFacilityId = request.fromFacilityId,
         destinationId = request.destinationId,
         destinationType = request.destinationType,

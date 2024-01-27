@@ -58,6 +58,7 @@ message CreateRequest {
   string massMeasure = 11;
   string estimatedDeliveryAt = 12;
   string deliveredAt = 13;
+  optional int32 pointNumber = 14;
 }
 
 message GetStreamByOrderIdRequest {

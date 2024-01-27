@@ -3,6 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.dto
 
 data class CreateOrderTrackingDto (
     val orderId: Long,
+    val pointNumber: Int?,
     val fromFacilityId: Long,
     val destinationId: Long,
     val destinationType: String,
