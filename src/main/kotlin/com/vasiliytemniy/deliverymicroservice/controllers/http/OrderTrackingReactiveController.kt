@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.controllers.http
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.domain.of
+import com.vasiliytemniy.deliverymicroservice.domain.toSuccessHttpResponse
 import com.vasiliytemniy.deliverymicroservice.dto.*
 import com.vasiliytemniy.deliverymicroservice.services.OrderTrackingReactiveService
 import io.swagger.v3.oas.annotations.Operation
@@ -31,12 +32,12 @@ class OrderTrackingReactiveController(
         operationId = "createOrderTracking",
         description = "Create new order tracking"
     )
-    suspend fun createOrderTracking(
+    fun createOrderTracking(
         @Valid @RequestBody req: CreateOrderTrackingDto
-    ): ResponseEntity<Mono<OrderTracking>> =
-        ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(orderTrackingReactiveService.createOrderTracking(OrderTracking.of(req)))
+    ): ResponseEntity<Mono<SuccessOrderTrackingResponse>> =
+        ResponseEntity.status(HttpStatus.CREATED)
+            .body(orderTrackingReactiveService.createOrderTracking(OrderTracking.of(req))
+                .flatMap { Mono.just(it.toSuccessHttpResponse()) })
             .also { log.info("created order tracking: $req") }
 
     @GetMapping(path = ["/by-order-id/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -46,21 +47,18 @@ class OrderTrackingReactiveController(
         operationId = "getOrderTrackingsByOrderId",
         description = "Get order trackings by order id with pagination"
     )
-    suspend fun getOrderTrackingsByOrderId(
+    fun getOrderTrackingsByOrderId(
         @PathVariable(required = true) orderId: Long,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int
-    ): ResponseEntity<Mono<Page<OrderTracking>>> =
+    ): ResponseEntity<Mono<Page<SuccessOrderTrackingResponse>>> =
         ResponseEntity
             .status(HttpStatus.OK)
-            .body(
-                orderTrackingReactiveService.getOrderTrackingsByOrderId(
-                    GetOrderTrackingsByOrderIdDto(
-                        orderId,
-                        PageRequest.of(page, size)
-                    )
-                )
-            ).also { log.info("get order trackings by order id: $orderId, page $page, size $size") }
+            .body(orderTrackingReactiveService.getOrderTrackingsByOrderId(
+                GetOrderTrackingsByOrderIdDto(orderId, PageRequest.of(page, size))
+            ).flatMap { content ->
+                Mono.just(content.map { it.toSuccessHttpResponse() })
+            }).also { log.info("get order trackings by order id: $orderId, page $page, size $size") }
 
     @GetMapping(path = ["/by-carrier-id/{carrierId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -69,22 +67,21 @@ class OrderTrackingReactiveController(
         operationId = "getOrderTrackingsByCarrierId",
         description = "Get order trackings by carrier id with pagination"
     )
-    suspend fun getOrderTrackingsByCarrierId(
+    fun getOrderTrackingsByCarrierId(
         @PathVariable(required = true) carrierId: Long,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int,
         @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
-    ): ResponseEntity<Mono<Page<OrderTracking>>> =
+    ): ResponseEntity<Mono<Page<SuccessOrderTrackingResponse>>> =
         ResponseEntity
             .status(HttpStatus.OK)
-            .body(
-                orderTrackingReactiveService.getOrderTrackingsByCarrierId(
-                    GetOrderTrackingsByCarrierIdDto(
-                        carrierId,
-                        PageRequest.of(page, size)
-                    ), filterActive
-                )
-            ).also { log.info("get order trackings by carrier id: $carrierId, page $page, size $size") }
+            .body(orderTrackingReactiveService.getOrderTrackingsByCarrierId(
+                GetOrderTrackingsByCarrierIdDto(
+                    carrierId, PageRequest.of(page, size)
+                ), filterActive
+            ).flatMap { content ->
+                Mono.just(content.map { it.toSuccessHttpResponse() })
+            }).also { log.info("get order trackings by carrier id: $carrierId, page $page, size $size") }
 
     @GetMapping(path = ["/last/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -93,12 +90,12 @@ class OrderTrackingReactiveController(
         operationId = "getLastOrderTrackingByOrderId",
         description = "Get last order tracking by order id"
     )
-    suspend fun getLastOrderTrackingByOrderId(
+    fun getLastOrderTrackingByOrderId(
         @PathVariable(required = true) orderId: Long
-    ): ResponseEntity<Mono<OrderTracking>?> =
-        ResponseEntity
-            .status(HttpStatus.OK)
-            .body(orderTrackingReactiveService.getLastOrderTrackingByOrderId(orderId))
+    ): ResponseEntity<Mono<SuccessOrderTrackingResponse>> =
+        ResponseEntity.status(HttpStatus.OK)
+            .body(orderTrackingReactiveService.getLastOrderTrackingByOrderId(orderId)
+                ?.flatMap { Mono.just(it.toSuccessHttpResponse()) })
             .also { log.info("get last order tracking by order id: $orderId") }
 
     @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -108,12 +105,12 @@ class OrderTrackingReactiveController(
         operationId = "setOrderTrackingStatus",
         description = "Set order tracking status"
     )
-    suspend fun setOrderTrackingStatus(
+    fun setOrderTrackingStatus(
         @Valid @RequestBody req: SetOrderTrackingStatusesDto
-    ): ResponseEntity<Flux<OrderTracking>> =
-        ResponseEntity
-            .status(HttpStatus.OK)
-            .body(orderTrackingReactiveService.setOrderTrackingStatuses(req))
+    ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
+        ResponseEntity.status(HttpStatus.OK)
+            .body(orderTrackingReactiveService.setOrderTrackingStatuses(req)
+                .flatMap { Flux.just(it.toSuccessHttpResponse()) })
             .also { log.info("set order tracking statuses: $req") }
 
     @DeleteMapping(path = ["/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -123,12 +120,12 @@ class OrderTrackingReactiveController(
         operationId = "deleteAllByOrderId",
         description = "Delete all order trackings by order id"
     )
-    suspend fun deleteAllByOrderId(
+    fun deleteAllByOrderId(
         @PathVariable(required = true) orderId: Long
-    ): ResponseEntity<Flux<OrderTracking>> =
-        ResponseEntity
-            .status(HttpStatus.GONE)
-            .body(orderTrackingReactiveService.deleteAllByOrderId(orderId))
+    ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
+        ResponseEntity.status(HttpStatus.GONE)
+            .body(orderTrackingReactiveService.deleteAllByOrderId(orderId)
+                .flatMap { Flux.just(it.toSuccessHttpResponse()) })
             .also { log.info("deleted order tracking: $orderId") }
 
     @DeleteMapping(path = ["/{orderId}/{pointNumber}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -138,13 +135,12 @@ class OrderTrackingReactiveController(
         operationId = "deleteByOrderTrackingIdentifier",
         description = "Delete order tracking by order id and point number"
     )
-    suspend fun deleteByOrderTrackingIdentifier(
-        @PathVariable(required = true) orderId: Long,
-        @PathVariable(required = true) pointNumber: Int
-    ): ResponseEntity<Mono<OrderTracking>> =
-        ResponseEntity
-            .status(HttpStatus.GONE)
-            .body(orderTrackingReactiveService.deleteByOrderTrackingIdentifier(orderId, pointNumber))
+    fun deleteByOrderTrackingIdentifier(
+        @PathVariable(required = true) orderId: Long, @PathVariable(required = true) pointNumber: Int
+    ): ResponseEntity<Mono<SuccessOrderTrackingResponse>> =
+        ResponseEntity.status(HttpStatus.GONE)
+            .body(orderTrackingReactiveService.deleteByOrderTrackingIdentifier(orderId, pointNumber)
+                .flatMap { Mono.just(it.toSuccessHttpResponse()) })
             .also { log.info("deleted order tracking: $orderId, $pointNumber") }
 
     companion object {
