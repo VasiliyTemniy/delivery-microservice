@@ -1,12 +1,12 @@
 CREATE TABLE IF NOT EXISTS delivery.order_trackings
 (
     id                          UUID            DEFAULT uuid_generate_v4() PRIMARY KEY,
-    order_id                    BIGINT          NOT NULL,
+    order_id                    VARCHAR(36)     NOT NULL,
     point_number                INTEGER         NOT NULL,
-    from_facility_id            BIGINT          NOT NULL,
-    destination_id              BIGINT          NOT NULL,
+    from_facility_id            VARCHAR(36)     NOT NULL,
+    destination_id              VARCHAR(36)     NOT NULL,
     destination_type            VARCHAR(60)     NOT NULL,
-    carrier_id                  BIGINT          NOT NULL,
+    carrier_id                  VARCHAR(36)     NOT NULL,
     status                      VARCHAR(60)     NOT NULL,
     delivery_cost               INTEGER         NOT NULL,
     currency                    VARCHAR(3)      NOT NULL,
