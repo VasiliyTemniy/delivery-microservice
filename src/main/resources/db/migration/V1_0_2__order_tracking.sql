@@ -31,12 +31,9 @@ BEGIN
   END IF;
 
   NEW.point_number = COALESCE((
-    SELECT MAX(row_number)
-    FROM (
-      SELECT ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY id) AS row_number
+      SELECT MAX(point_number) + 1
       FROM delivery.order_trackings
       WHERE order_id = NEW.order_id
-    ) AS subquery
   ), 0);
 
   RETURN NEW;
