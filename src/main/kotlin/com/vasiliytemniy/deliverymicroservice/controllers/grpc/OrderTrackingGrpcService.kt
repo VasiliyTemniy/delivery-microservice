@@ -17,86 +17,85 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeout
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 
 
 @GrpcService(interceptors = [LogGrpcInterceptor::class])
 class OrderTrackingGrpcService(
-    private val orderTrackingService: OrderTrackingCoroutineService, private val validator: Validator
+    private val orderTrackingService: OrderTrackingCoroutineService,
+    private val validator: Validator
 ) : OrderTrackingServiceGrpcKt.OrderTrackingServiceCoroutineImplBase() {
 
-    override suspend fun createOrderTracking(request: CreateOrderTrackingRequest): OrderTrackingResponse =
+    override suspend fun create(request: CreateRequest): OrderTrackingResponse =
         withTimeout(TIMEOUT_MILLIS) {
-            orderTrackingService.createOrderTracking(validate(OrderTracking.of(request)))
+            orderTrackingService.create(validate(OrderTracking.of(request)))
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it.toProto()).build() }
                 .also { log.info("created order tracking: $request") }
         }
 
-    override fun getOrderTrackingsByOrderId(request: GetOrderTrackingsByOrderIdRequest): Flow<ManyOrderTrackingsWithPaginationResponse> {
-        var index = 0
-        return orderTrackingService.getOrderTrackingsByOrderIdFlow(validate(GetOrderTrackingsByOrderIdDto.of(request)))
-            .map {
-                ManyOrderTrackingsWithPaginationResponse.newBuilder().setOrderTracking(index++, it.toProto()).build()
-            }.flowOn(Dispatchers.IO)
-    }
+    override fun getStreamByOrderId(request: GetStreamByOrderIdRequest): Flow<OrderTrackingResponse> =
+        orderTrackingService.getFlowByOrderId(validate(request.orderId))
+            .map { OrderTrackingResponse.newBuilder().setOrderTracking(it.toProto()).build() }
+            .flowOn(Dispatchers.IO)
 
-    override suspend fun getLastOrderTrackingByOrderId(request: GetLastOrderTrackingByOrderIdRequest): OrderTrackingResponse =
+    override suspend fun getPageByOrderId(request: GetPageByOrderIdRequest): PageOrderTrackingsResponse =
+        orderTrackingService.getPageByOrderId(validate(GetOrderTrackingsByOrderIdDto.of(request)))
+            .toPageOrderTrackingsResponse()
+            .also { log.info("got order trackings: $request") }
+
+    override suspend fun getLastByOrderId(request: GetLastByOrderIdRequest): OrderTrackingResponse =
         withTimeout(TIMEOUT_MILLIS) {
-            orderTrackingService.getLastOrderTrackingByOrderId(validate(request.orderId))?.toProto()
+            orderTrackingService.getLastByOrderId(validate(request.orderId))?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
                 .also { log.info("got last order tracking: $request") }
         }
 
-    override fun getOrderTrackingsByCarrierId(request: GetOrderTrackingsByCarrierIdRequest): Flow<ManyOrderTrackingsWithPaginationResponse> {
-        var index = 0
-        return orderTrackingService.getOrderTrackingsByCarrierIdFlow(
-            validate(GetOrderTrackingsByCarrierIdDto.of(request)), request.filterActive
-        ).map {
-                ManyOrderTrackingsWithPaginationResponse.newBuilder().setOrderTracking(index++, it.toProto()).build()
-            }.flowOn(Dispatchers.IO)
-    }
+    override fun getStreamByCarrierId(request: GetStreamByCarrierIdRequest): Flow<OrderTrackingResponse> =
+        orderTrackingService.getFlowByCarrierId(validate(request.carrierId), validate(request.filterActive))
+            .map { OrderTrackingResponse.newBuilder().setOrderTracking(it.toProto()).build() }
+            .flowOn(Dispatchers.IO)
 
-    override suspend fun updateOrderTracking(request: UpdateOrderTrackingRequest): OrderTrackingResponse =
+    override suspend fun getPageByCarrierId(request: GetPageByCarrierIdRequest): PageOrderTrackingsResponse =
+        orderTrackingService.getPageByCarrierId(validate(GetOrderTrackingsByCarrierIdDto.of(request)))
+            .toPageOrderTrackingsResponse()
+            .also { log.info("got order trackings: $request") }
+
+    override suspend fun setStatuses(request: SetStatusesRequest): ManyOrderTrackingsResponse =
         withTimeout(TIMEOUT_MILLIS) {
-            orderTrackingService.updateOrderTracking(validate(UpdateOrderTrackingDto.of(request)))?.toProto()
+            ManyOrderTrackingsResponse.newBuilder().addAllOrderTracking(
+                orderTrackingService.setStatuses(validate(SetOrderTrackingStatusesDto.of(request)))
+                    .map { it.toProto() }
+            ).build()
+        }
+
+    override suspend fun reorder(request: ReorderRequest): ManyOrderTrackingsResponse =
+        withTimeout(TIMEOUT_MILLIS) {
+            ManyOrderTrackingsResponse.newBuilder().addAllOrderTracking(
+                orderTrackingService.reorder(validate(ReorderOrderTrackingsDto.of(request)))
+                    .map { it.toProto() }
+            ).build()
+        }
+
+    override suspend fun update(request: UpdateRequest): OrderTrackingResponse =
+        withTimeout(TIMEOUT_MILLIS) {
+            orderTrackingService.update(validate(UpdateOrderTrackingDto.of(request)))?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
                 .also { log.info("updated order tracking: $request") }
         }
 
-    override suspend fun setOrderTrackingStatuses(request: SetOrderTrackingStatusesRequest): ManyOrderTrackingsResponse =
+    override suspend fun deleteByOrderId(request: DeleteByOrderIdRequest): ManyOrderTrackingsResponse =
         withTimeout(TIMEOUT_MILLIS) {
-            val builder = ManyOrderTrackingsResponse.newBuilder()
-            val orderTrackings =
-                orderTrackingService.setOrderTrackingStatuses(validate(SetOrderTrackingStatusesDto.of(request)))
-
-            for (it in orderTrackings) {
-                builder.addOrderTracking(it.toProto())
-            }
-
-            builder.build()
+            ManyOrderTrackingsResponse.newBuilder().addAllOrderTracking(
+                orderTrackingService.deleteAllByOrderId(validate(request.orderId))
+                    .map { it.toProto() }
+            ).build()
         }
 
-    override suspend fun reorderOrderTrackings(request: ReorderOrderTrackingsRequest): ManyOrderTrackingsResponse {
-        // TODO: Implement!
-        throw NotImplementedError()
-    }
-
-    override suspend fun deleteOrderTrackingsByOrderId(request: DeleteOrderTrackingsByOrderIdRequest): ManyOrderTrackingsResponse =
+    override suspend fun deleteByExternalId(request: DeleteByExternalIdRequest): OrderTrackingResponse =
         withTimeout(TIMEOUT_MILLIS) {
-            val builder = ManyOrderTrackingsResponse.newBuilder()
-            val orderTrackings = orderTrackingService.deleteAllByOrderId(validate(request.orderId))
-
-            for (it in orderTrackings) {
-                builder.addOrderTracking(it.toProto())
-            }
-
-            builder.build()
-        }
-
-    override suspend fun deleteByOrderTrackingIdentifier(request: DeleteByOrderTrackingIdentifierRequest): OrderTrackingResponse =
-        withTimeout(TIMEOUT_MILLIS) {
-            orderTrackingService.deleteByOrderTrackingIdentifier(
+            orderTrackingService.deleteByExternalId(
                 validate(request.orderId), validate(request.pointNumber)
-            ).toProto()
+            )?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
                 .also { log.info("deleted order tracking: $request") }
         }
@@ -113,4 +112,17 @@ class OrderTrackingGrpcService(
         private val log = LoggerFactory.getLogger(OrderTrackingGrpcService::class.java)
         const val TIMEOUT_MILLIS = 5000L
     }
+}
+
+fun Page<OrderTracking>.toPageOrderTrackingsResponse(): PageOrderTrackingsResponse {
+    return PageOrderTrackingsResponse
+        .newBuilder()
+        .setIsFirst(this.isFirst)
+        .setIsLast(this.isLast)
+        .setTotalElements(this.totalElements.toInt())
+        .setTotalPages(this.totalPages)
+        .setPage(this.pageable.pageNumber)
+        .setSize(this.pageable.pageSize)
+        .addAllOrderTracking(this.content.map { it.toProto() })
+        .build()
 }
