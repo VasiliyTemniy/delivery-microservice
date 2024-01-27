@@ -1,15 +1,13 @@
 package com.vasiliytemniy.deliverymicroservice.services
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByCarrierIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByOrderIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.SetOrderTrackingStatusesDto
-import com.vasiliytemniy.deliverymicroservice.dto.UpdateOrderTrackingDto
+import com.vasiliytemniy.deliverymicroservice.dto.*
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingCoroutineRepository
 import jakarta.validation.Valid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,47 +17,60 @@ class OrderTrackingCoroutineServiceImpl(
 ) : OrderTrackingCoroutineService {
 
     @Transactional
-    override suspend fun createOrderTracking(@Valid orderTracking: OrderTracking): OrderTracking =
+    override suspend fun create(@Valid orderTracking: OrderTracking): OrderTracking =
         withContext(Dispatchers.IO) {
             orderTrackingCoroutineRepository.save(orderTracking)
         }
 
     @Transactional(readOnly = true)
-    override suspend fun getLastOrderTrackingByOrderId(orderId: Long): OrderTracking? =
+    override fun getFlowByOrderId(orderId: Long): Flow<OrderTracking> =
+        orderTrackingCoroutineRepository.findAllByOrderId(orderId)
+
+    @Transactional(readOnly = true)
+    override suspend fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Page<OrderTracking> =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.findPageByOrderId(requestDto.orderId, requestDto.pageable)
+        }
+
+    @Transactional(readOnly = true)
+    override suspend fun getLastByOrderId(orderId: Long): OrderTracking? =
         withContext(Dispatchers.IO) {
             orderTrackingCoroutineRepository.findLastByOrderId(orderId)
         }
 
     @Transactional(readOnly = true)
-    override fun getOrderTrackingsByOrderIdFlow(requestDto: GetOrderTrackingsByOrderIdDto): Flow<OrderTracking> =
-        orderTrackingCoroutineRepository.findPageByOrderId(requestDto.orderId, requestDto.pageable)
+    override fun getFlowByCarrierId(carrierId: Long, filterActive: Boolean): Flow<OrderTracking> =
+        orderTrackingCoroutineRepository.findAllByCarrierId(carrierId, filterActive)
 
     @Transactional(readOnly = true)
-    override fun getOrderTrackingsByCarrierIdFlow(requestDto: GetOrderTrackingsByCarrierIdDto, active: Boolean): Flow<OrderTracking> =
-        if (active)
-            orderTrackingCoroutineRepository.findPageActiveByCarrierId(requestDto.carrierId, requestDto.pageable)
-        else
-            orderTrackingCoroutineRepository.findPageByCarrierId(requestDto.carrierId, requestDto.pageable)
+    override suspend fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Page<OrderTracking> =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.findPageByCarrierId(requestDto.carrierId, requestDto.pageable, requestDto.filterActive)
+        }
 
     // TODO: consider implementing with single SQL query
     @Transactional
-    override suspend fun setOrderTrackingStatuses(requestDto: SetOrderTrackingStatusesDto): List<OrderTracking> =
+    override suspend fun setStatuses(requestDto: SetOrderTrackingStatusesDto): List<OrderTracking> =
         withContext(Dispatchers.IO) {
-            requestDto.orderTrackingIdentifiers
-                .map {
-                    orderTrackingCoroutineRepository.setOrderTrackingStatus(
-                        it.orderId,
-                        it.pointNumber,
-                        requestDto.status,
-                        requestDto.deliveredAt
-                    )
-                }
+            requestDto.orderTrackingExternalIds.mapNotNull {
+                orderTrackingCoroutineRepository.setStatus(
+                    it.orderId,
+                    it.pointNumber,
+                    requestDto.status,
+                    requestDto.parsedDeliveredAt
+                )
+            }
         }
 
     @Transactional
-    override suspend fun updateOrderTracking(requestDto: UpdateOrderTrackingDto): OrderTracking =
+    override suspend fun reorder(requestDto: ReorderOrderTrackingsDto): List<OrderTracking> {
+        TODO("Not yet implemented")
+    }
+
+    @Transactional
+    override suspend fun update(requestDto: UpdateOrderTrackingDto): OrderTracking? =
         withContext(Dispatchers.IO) {
-            orderTrackingCoroutineRepository.updateOrderTracking(
+            orderTrackingCoroutineRepository.update(
                 requestDto.orderId,
                 requestDto.pointNumber,
                 requestDto.fromFacilityId,
@@ -72,8 +83,8 @@ class OrderTrackingCoroutineServiceImpl(
                 requestDto.currencyDecimalMultiplier,
                 requestDto.massControlValue,
                 requestDto.massMeasure,
-                requestDto.estimatedDeliveryAt,
-                requestDto.deliveredAt
+                requestDto.parsedEstimatedDeliveryAt,
+                requestDto.parsedDeliveredAt
             )
         }
 
@@ -84,8 +95,9 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional
-    override suspend fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int) =
+    override suspend fun deleteByExternalId(orderId: Long, pointNumber: Int) =
         withContext(Dispatchers.IO) {
-            orderTrackingCoroutineRepository.deleteByOrderTrackingIdentifier(orderId, pointNumber)
+            // TODO!: Reorder after deleting
+            orderTrackingCoroutineRepository.deleteByExternalId(orderId, pointNumber)
         }
 }

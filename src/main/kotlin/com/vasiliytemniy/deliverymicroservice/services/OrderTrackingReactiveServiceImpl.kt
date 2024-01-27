@@ -1,10 +1,7 @@
 package com.vasiliytemniy.deliverymicroservice.services
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByCarrierIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.GetOrderTrackingsByOrderIdDto
-import com.vasiliytemniy.deliverymicroservice.dto.SetOrderTrackingStatusesDto
-import com.vasiliytemniy.deliverymicroservice.dto.UpdateOrderTrackingDto
+import com.vasiliytemniy.deliverymicroservice.dto.*
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingReactiveRepository
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -20,20 +17,28 @@ class OrderTrackingReactiveServiceImpl(
 ) : OrderTrackingReactiveService {
 
     @Transactional
-    override fun createOrderTracking(@Valid orderTracking: OrderTracking): Mono<OrderTracking> =
+    override fun create(@Valid orderTracking: OrderTracking): Mono<OrderTracking> =
         orderTrackingReactiveRepository.save(orderTracking)
 
     @Transactional(readOnly = true)
-    override fun getOrderTrackingsByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
+    override fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findPageByOrderId(requestDto.orderId, requestDto.pageable)
             .collectList()
             .zipWith(this.orderTrackingReactiveRepository.count())
             .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
-    override fun getOrderTrackingsByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto, active: Boolean): Mono<Page<OrderTracking>> =
-        if (active)
-            orderTrackingReactiveRepository.findPageActiveByCarrierId(requestDto.carrierId, requestDto.pageable)
+    override fun getAllByOrderId(orderId: Long): Flux<OrderTracking> =
+        orderTrackingReactiveRepository.findAllByOrderId(orderId)
+
+    @Transactional(readOnly = true)
+    override fun getLastByOrderId(orderId: Long): Mono<OrderTracking> =
+        orderTrackingReactiveRepository.findLastByOrderId(orderId)
+
+    @Transactional(readOnly = true)
+    override fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
+        if (requestDto.filterActive)
+            orderTrackingReactiveRepository.findPageByCarrierIdAndDeliveredAt(requestDto.carrierId, null, requestDto.pageable)
                 .collectList()
                 .zipWith(this.orderTrackingReactiveRepository.count())
                 .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
@@ -44,26 +49,34 @@ class OrderTrackingReactiveServiceImpl(
                 .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
-    override fun getLastOrderTrackingByOrderId(orderId: Long): Mono<OrderTracking>? =
-        orderTrackingReactiveRepository.findLastByOrderId(orderId)
+    override fun getAllByCarrierId(carrierId: Long, filterActive: Boolean): Flux<OrderTracking> =
+        if (filterActive)
+            orderTrackingReactiveRepository.findAllByCarrierIdAndDeliveredAt(carrierId, null)
+        else
+            orderTrackingReactiveRepository.findAllByCarrierId(carrierId)
 
     @Transactional
-    override fun setOrderTrackingStatuses(requestDto: SetOrderTrackingStatusesDto): Flux<OrderTracking> =
+    override fun setStatuses(requestDto: SetOrderTrackingStatusesDto): Flux<OrderTracking> =
         Flux.merge(
-            requestDto.orderTrackingIdentifiers
+            requestDto.orderTrackingExternalIds
                 .map {
-                    orderTrackingReactiveRepository.setOrderTrackingStatus(
+                    orderTrackingReactiveRepository.setStatus(
                         it.orderId,
                         it.pointNumber,
                         requestDto.status,
-                        requestDto.deliveredAt
+                        requestDto.parsedDeliveredAt
                     )
                 }
         )
 
     @Transactional
-    override fun updateOrderTracking(requestDto: UpdateOrderTrackingDto): Mono<OrderTracking> =
-        orderTrackingReactiveRepository.updateOrderTracking(
+    override fun reorder(requestDto: ReorderOrderTrackingsDto): Flux<OrderTracking> {
+        TODO("Not yet implemented")
+    }
+
+    @Transactional
+    override fun update(requestDto: UpdateOrderTrackingDto): Mono<OrderTracking> =
+        orderTrackingReactiveRepository.update(
             requestDto.orderId,
             requestDto.pointNumber,
             requestDto.fromFacilityId,
@@ -76,8 +89,8 @@ class OrderTrackingReactiveServiceImpl(
             requestDto.currencyDecimalMultiplier,
             requestDto.massControlValue,
             requestDto.massMeasure,
-            requestDto.estimatedDeliveryAt,
-            requestDto.deliveredAt
+            requestDto.parsedEstimatedDeliveryAt,
+            requestDto.parsedDeliveredAt
         )
 
     @Transactional
@@ -85,6 +98,7 @@ class OrderTrackingReactiveServiceImpl(
         orderTrackingReactiveRepository.deleteAllByOrderId(orderId)
 
     @Transactional
-    override fun deleteByOrderTrackingIdentifier(orderId: Long, pointNumber: Int): Mono<OrderTracking> =
-        orderTrackingReactiveRepository.deleteByOrderTrackingIdentifier(orderId, pointNumber)
+    override fun deleteByExternalId(orderId: Long, pointNumber: Int): Mono<OrderTracking> =
+        // TODO!: Reorder after deleting
+        orderTrackingReactiveRepository.deleteByExternalId(orderId, pointNumber)
 }
