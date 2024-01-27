@@ -2,9 +2,10 @@ package com.vasiliytemniy.deliverymicroservice.domain
 
 import com.vasiliytemniy.deliverymicroservice.dto.CreateOrderTrackingDto
 import com.vasiliytemniy.deliverymicroservice.dto.SuccessOrderTrackingResponse
+import com.vasiliytemniy.deliverymicroservice.utils.parseOptionalDate
 import jakarta.validation.constraints.Size
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.OrderTrackingData as OrderTrackingDataGrpc
-import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.CreateOrderTrackingRequest as CreateOrderTrackingRequestGrpc
+import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking.CreateRequest as CreateOrderTrackingRequestGrpc
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -93,28 +94,14 @@ fun OrderTracking.toSuccessHttpResponse(): SuccessOrderTrackingResponse {
         currencyDecimalMultiplier = this.currencyDecimalMultiplier,
         massControlValue = this.massControlValue,
         massMeasure = this.massMeasure,
-        estimatedDeliveryAt = this.estimatedDeliveryAt.toString(),
-        deliveredAt = this.deliveredAt.toString(),
+        estimatedDeliveryAt = this.estimatedDeliveryAt?.toString(),
+        deliveredAt = this.deliveredAt?.toString(),
         createdAt = this.createdAt.toString(),
         updatedAt = this.updatedAt.toString()
     )
 }
 
 fun OrderTracking.Companion.of(request: CreateOrderTrackingRequestGrpc): OrderTracking {
-
-    val parsedEstimatedDeliveryAt =
-        if (request.estimatedDeliveryAt == null || request.estimatedDeliveryAt == "" || request.estimatedDeliveryAt == "null") {
-            null
-        } else {
-            LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
-        }
-    val parsedDeliveredAt =
-        if (request.deliveredAt == null || request.deliveredAt == "" || request.deliveredAt == "null") {
-            null
-        } else {
-            LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
-        }
-
     return OrderTracking(
         id = null,
         orderId = request.orderId,
@@ -129,28 +116,14 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingRequestGrpc): OrderTr
         currencyDecimalMultiplier = request.currencyDecimalMultiplier,
         massControlValue = request.massControlValue,
         massMeasure = request.massMeasure,
-        estimatedDeliveryAt = parsedEstimatedDeliveryAt,
-        deliveredAt = parsedDeliveredAt,
+        estimatedDeliveryAt = parseOptionalDate(request.estimatedDeliveryAt),
+        deliveredAt = parseOptionalDate(request.deliveredAt),
         createdAt = LocalDateTime.now(),
         updatedAt = LocalDateTime.now()
     )
 }
 
 fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
-
-    val parsedEstimatedDeliveryAt =
-        if (request.estimatedDeliveryAt == null || request.estimatedDeliveryAt == "" || request.estimatedDeliveryAt == "null") {
-            null
-        } else {
-            LocalDateTime.parse(request.estimatedDeliveryAt, DateTimeFormatter.ISO_DATE)
-        }
-    val parsedDeliveredAt =
-        if (request.deliveredAt == null || request.deliveredAt == "" || request.deliveredAt == "null") {
-            null
-        } else {
-            LocalDateTime.parse(request.deliveredAt, DateTimeFormatter.ISO_DATE)
-        }
-
     return OrderTracking(
         id = null,
         orderId = request.orderId,
@@ -165,8 +138,8 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
         currencyDecimalMultiplier = request.currencyDecimalMultiplier,
         massControlValue = request.massControlValue,
         massMeasure = request.massMeasure,
-        estimatedDeliveryAt = parsedEstimatedDeliveryAt,
-        deliveredAt = parsedDeliveredAt,
+        estimatedDeliveryAt = parseOptionalDate(request.estimatedDeliveryAt),
+        deliveredAt = parseOptionalDate(request.deliveredAt),
         createdAt = LocalDateTime.now(),
         updatedAt = LocalDateTime.now()
     )
