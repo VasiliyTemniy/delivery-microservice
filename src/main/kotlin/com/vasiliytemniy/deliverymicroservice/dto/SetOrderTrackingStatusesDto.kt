@@ -2,8 +2,6 @@ package com.vasiliytemniy.deliverymicroservice.dto
 
 import com.vasiliytemniy.deliverymicroservice.utils.parseOptionalDate
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
-import java.time.LocalDateTime
-
 
 data class SetOrderTrackingStatusesDto(
     val orderTrackingExternalIds: List<OrderTrackingExternalIdDto>,
