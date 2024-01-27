@@ -4,15 +4,17 @@ package com.vasiliytemniy.grpc.ordertracking.service;
 
 
 service OrderTrackingService {
-  rpc createOrderTracking (CreateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc getOrderTrackingsByOrderId (GetOrderTrackingsByOrderIdRequest) returns (stream ManyOrderTrackingsWithPaginationResponse);
-  rpc getLastOrderTrackingByOrderId (GetLastOrderTrackingByOrderIdRequest) returns (OrderTrackingResponse);
-  rpc getOrderTrackingsByCarrierId (GetOrderTrackingsByCarrierIdRequest) returns (stream ManyOrderTrackingsWithPaginationResponse);
-  rpc updateOrderTracking (UpdateOrderTrackingRequest) returns (OrderTrackingResponse);
-  rpc setOrderTrackingStatuses (SetOrderTrackingStatusesRequest) returns (ManyOrderTrackingsResponse);
-  rpc reorderOrderTrackings (ReorderOrderTrackingsRequest) returns (ManyOrderTrackingsResponse);
-  rpc deleteOrderTrackingsByOrderId (DeleteOrderTrackingsByOrderIdRequest) returns (ManyOrderTrackingsResponse);
-  rpc deleteByOrderTrackingIdentifier (DeleteByOrderTrackingIdentifierRequest) returns (OrderTrackingResponse);
+  rpc create (CreateRequest) returns (OrderTrackingResponse);
+  rpc getStreamByOrderId (GetStreamByOrderIdRequest) returns (stream OrderTrackingResponse);
+  rpc getPageByOrderId (GetPageByOrderIdRequest) returns (PageOrderTrackingsResponse);
+  rpc getLastByOrderId (GetLastByOrderIdRequest) returns (OrderTrackingResponse);
+  rpc getStreamByCarrierId (GetStreamByCarrierIdRequest) returns (stream OrderTrackingResponse);
+  rpc getPageByCarrierId (GetPageByCarrierIdRequest) returns (PageOrderTrackingsResponse);
+  rpc update (UpdateRequest) returns (OrderTrackingResponse);
+  rpc setStatuses (SetStatusesRequest) returns (ManyOrderTrackingsResponse);
+  rpc reorder (ReorderRequest) returns (ManyOrderTrackingsResponse);
+  rpc deleteByOrderId (DeleteByOrderIdRequest) returns (ManyOrderTrackingsResponse);
+  rpc deleteByExternalId (DeleteByExternalIdRequest) returns (OrderTrackingResponse);
 }
 
 message OrderTrackingData {
@@ -35,15 +37,14 @@ message OrderTrackingData {
   string updatedAt = 17;
 }
 
-// External identifier
-message OrderTrackingIdentifier {
+message OrderTrackingExternalId {
   int64 orderId = 1;
   int32 pointNumber = 2;
 }
 
 // Requests
 
-message CreateOrderTrackingRequest {
+message CreateRequest {
   int64 orderId = 1;
   int64 fromFacilityId = 2;
   int64 destinationId = 3;
@@ -59,24 +60,34 @@ message CreateOrderTrackingRequest {
   string deliveredAt = 13;
 }
 
-message GetOrderTrackingsByOrderIdRequest {
+message GetStreamByOrderIdRequest {
+  int64 orderId = 1;
+}
+
+message GetPageByOrderIdRequest {
   int64 orderId = 1;
   int32 page = 2;
   int32 size = 3;
 }
 
-message GetOrderTrackingsByCarrierIdRequest {
+message GetLastByOrderIdRequest {
+  int64 orderId = 1;
+  bool findLast = 2;
+}
+
+message GetStreamByCarrierIdRequest {
+  int64 carrierId = 1;
+  bool filterActive = 2;
+}
+
+message GetPageByCarrierIdRequest {
   int64 carrierId = 1;
   int32 page = 2;
   int32 size = 3;
   bool filterActive = 4;
 }
 
-message GetLastOrderTrackingByOrderIdRequest {
-  int64 orderId = 1;
-}
-
-message UpdateOrderTrackingRequest {
+message UpdateRequest {
   int64 orderId = 1;
   int32 pointNumber = 2;
   int64 fromFacilityId = 3;
@@ -93,13 +104,13 @@ message UpdateOrderTrackingRequest {
   string deliveredAt = 14;
 }
 
-message SetOrderTrackingStatusesRequest {
+message SetStatusesRequest {
   string status = 1;
   string deliveredAt = 2;
-  repeated OrderTrackingIdentifier orderTrackingIdentifiers = 3; // An array to be able to set multiple orders statuses if many orders are delivered at the same time
+  repeated OrderTrackingExternalId orderTrackingExternalIds = 3; // An array to be able to set multiple orders statuses if many orders are delivered at the same time
 }
 
-message ReorderOrderTrackingsRequest {
+message ReorderRequest {
   message MapFieldEntry {
     int32 key = 1;
     int32 value = 2;
@@ -108,11 +119,11 @@ message ReorderOrderTrackingsRequest {
   repeated MapFieldEntry fromPointNumberToPointNumber = 2;
 }
 
-message DeleteOrderTrackingsByOrderIdRequest {
+message DeleteByOrderIdRequest {
   int64 orderId = 1;
 }
 
-message DeleteByOrderTrackingIdentifierRequest {
+message DeleteByExternalIdRequest {
   int64 orderId = 1;
   int32 pointNumber = 2;
 }
@@ -128,7 +139,7 @@ message ManyOrderTrackingsResponse {
   repeated OrderTrackingData orderTracking = 1;
 }
 
-message ManyOrderTrackingsWithPaginationResponse {
+message PageOrderTrackingsResponse {
   repeated OrderTrackingData orderTracking = 1;
   int32 page = 2;
   int32 size = 3;
