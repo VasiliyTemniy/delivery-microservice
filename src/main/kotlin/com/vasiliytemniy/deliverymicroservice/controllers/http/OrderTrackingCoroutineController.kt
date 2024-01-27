@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeout
 import org.slf4j.LoggerFactory
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -34,46 +35,43 @@ class OrderTrackingCoroutineController(
     )
     suspend fun createOrderTracking(
         @Valid @RequestBody req: CreateOrderTrackingDto
-    ): ResponseEntity<SuccessOrderTrackingResponse> = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity.status(HttpStatus.CREATED)
-            .body(orderTrackingCoroutineService.createOrderTracking(OrderTracking.of(req)).toSuccessHttpResponse())
-            .also { log.info("created order tracking: $req") }
-    }
+    ): ResponseEntity<SuccessOrderTrackingResponse> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity.status(HttpStatus.CREATED)
+                .body(orderTrackingCoroutineService.create(OrderTracking.of(req)).toSuccessHttpResponse())
+                .also { log.info("created order tracking: $req") }
+        }
 
     @GetMapping(path = ["/flow/by-order-id/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
-        method = "getOrderTrackingsByOrderIdFlow",
+        method = "getFlowOrderTrackingsByOrderId",
         summary = "Get order trackings by order id",
-        operationId = "getOrderTrackingsByOrderIdFlow",
+        operationId = "getFlowOrderTrackingsByOrderId",
+        description = "Get stream of all order trackings by order id"
+    )
+    fun getFlowOrderTrackingsByOrderId(
+        @PathVariable(required = true) orderId: Long,
+    ): Flow<SuccessOrderTrackingResponse> =
+        orderTrackingCoroutineService.getFlowByOrderId(orderId)
+            .map { it.toSuccessHttpResponse() }
+            .also { log.info("response: $it") }
+
+    @GetMapping(path = ["/by-order-id/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "getPageOrderTrackingsByOrderId",
+        summary = "Get order trackings by order id with pagination",
+        operationId = "getPageOrderTrackingsByOrderId",
         description = "Get order trackings by order id with pagination"
     )
-    fun getOrderTrackingsByOrderIdFlow(
+    suspend fun getPageOrderTrackingsByOrderId(
         @PathVariable(required = true) orderId: Long,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int
-    ): Flow<SuccessOrderTrackingResponse> = orderTrackingCoroutineService.getOrderTrackingsByOrderIdFlow(
-        GetOrderTrackingsByOrderIdDto(
-            orderId, PageRequest.of(page, size)
-        )
-    ).map { it -> it.toSuccessHttpResponse().also { log.info("response: $it") } }
-
-    @GetMapping(path = ["/flow/by-carrier-id/{carrierId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    @Operation(
-        method = "getOrderTrackingsByCarrierIdFlow",
-        summary = "Get order trackings by carrier id",
-        operationId = "getOrderTrackingsByCarrierIdFlow",
-        description = "Get order trackings by carrier id with pagination"
-    )
-    fun getOrderTrackingsByCarrierIdFlow(
-        @PathVariable(required = true) carrierId: Long,
-        @RequestParam(name = "page", defaultValue = "0") page: Int,
-        @RequestParam(name = "size", defaultValue = "10") size: Int,
-        @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
-    ): Flow<SuccessOrderTrackingResponse> = orderTrackingCoroutineService.getOrderTrackingsByCarrierIdFlow(
-        GetOrderTrackingsByCarrierIdDto(
-            carrierId, PageRequest.of(page, size)
-        ), filterActive
-    ).map { it -> it.toSuccessHttpResponse().also { log.info("response: $it") } }
+    ): Page<SuccessOrderTrackingResponse> =
+        orderTrackingCoroutineService.getPageByOrderId(
+            GetOrderTrackingsByOrderIdDto(orderId, PageRequest.of(page, size))
+        ).map { it -> it.toSuccessHttpResponse()
+            .also { log.info("response: $it") } }
 
     @GetMapping(path = ["/last/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -84,30 +82,141 @@ class OrderTrackingCoroutineController(
     )
     suspend fun getLastOrderTrackingByOrderId(
         @PathVariable(required = true) orderId: Long
-    ): ResponseEntity<SuccessOrderTrackingResponse?> = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity.status(HttpStatus.OK)
-            .body(orderTrackingCoroutineService.getLastOrderTrackingByOrderId(orderId)?.toSuccessHttpResponse())
-            .also { log.info("get last order tracking by order id: $orderId") }
-    }
+    ): ResponseEntity<SuccessOrderTrackingResponse?> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity.status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.getLastByOrderId(orderId)?.toSuccessHttpResponse())
+                .also { log.info("get last order tracking by order id: $orderId") }
+        }
+
+    @GetMapping(path = ["/flow/by-carrier-id/{carrierId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "getFlowOrderTrackingsByCarrierId",
+        summary = "Get order trackings by carrier id",
+        operationId = "getFlowOrderTrackingsByCarrierId",
+        description = "Get order trackings by carrier id with pagination"
+    )
+    fun getFlowOrderTrackingsByCarrierId(
+        @PathVariable(required = true) carrierId: Long,
+        @RequestParam(name = "page", defaultValue = "0") page: Int,
+        @RequestParam(name = "size", defaultValue = "10") size: Int,
+        @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
+    ): Flow<SuccessOrderTrackingResponse> =
+        orderTrackingCoroutineService.getFlowByCarrierId(carrierId, filterActive)
+            .map { it.toSuccessHttpResponse() }
+            .also { log.info("response: $it") }
+
+    @GetMapping(path = ["/by-carrier-id/{carrierId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "getPageOrderTrackingsByCarrierId",
+        summary = "Get order trackings by carrier id",
+        operationId = "getPageOrderTrackingsByCarrierId",
+        description = "Get order trackings by carrier id with pagination"
+    )
+    suspend fun getPageOrderTrackingsByCarrierId(
+        @PathVariable(required = true) carrierId: Long,
+        @RequestParam(name = "page", defaultValue = "0") page: Int,
+        @RequestParam(name = "size", defaultValue = "10") size: Int,
+        @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
+    ): Page<SuccessOrderTrackingResponse> =
+        withTimeout(TIMEOUT_MILLIS) {
+            orderTrackingCoroutineService.getPageByCarrierId(
+                GetOrderTrackingsByCarrierIdDto(carrierId, PageRequest.of(page, size), filterActive)
+            ).map { it.toSuccessHttpResponse() }
+                .also { log.info("response: $it") }
+        }
+
 
     @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
-        method = "setOrderTrackingStatus",
-        summary = "Set order tracking status",
-        operationId = "setOrderTrackingStatus",
-        description = "Set order tracking status"
+        method = "setOrderTrackingStatuses",
+        summary = "Set order tracking statuses",
+        operationId = "setOrderTrackingStatuses",
+        description = "Set order tracking statuses"
     )
     suspend fun setOrderTrackingStatus(
-        @Valid @RequestBody req: SetOrderTrackingStatusesDto
+        @RequestBody req: Any
     ) = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity.status(HttpStatus.OK).body(
-            orderTrackingCoroutineService.setOrderTrackingStatuses(
-                SetOrderTrackingStatusesDto(
-                    req.orderTrackingIdentifiers, req.status, req.deliveredAt
-                )
-            )
-        ).also { log.info("set order tracking status: $req") }
+
+        println("WE ARRST HEREEEE")
+
+        println(req)
+
     }
+
+
+//    @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
+//    @Operation(
+//        method = "setOrderTrackingStatuses",
+//        summary = "Set order tracking statuses",
+//        operationId = "setOrderTrackingStatuses",
+//        description = "Set order tracking statuses"
+//    )
+//    suspend fun setOrderTrackingStatus(
+//        @Valid @RequestBody req: SetOrderTrackingStatusesDto
+//    ) : ResponseEntity<List<SuccessOrderTrackingResponse>> = withTimeout(TIMEOUT_MILLIS) {
+//        ResponseEntity.status(HttpStatus.OK).body(
+//            orderTrackingCoroutineService.setStatuses(
+//                SetOrderTrackingStatusesDto(req.orderTrackingExternalIds, req.status, req.deliveredAt)
+//            )
+//        ).also { log.info("set order tracking status: $req") }
+//    }
+
+    @PutMapping(path = ["/reorder"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "reorderOrderTrackings",
+        summary = "Reorder order trackings",
+        operationId = "reorderOrderTrackings",
+        description = "Reorder order trackings, change point numbers"
+    )
+    suspend fun reorderOrderTrackings(
+        @Valid @RequestBody req: ReorderOrderTrackingsDto
+    ) : ResponseEntity<List<SuccessOrderTrackingResponse>> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.reorder(
+                        ReorderOrderTrackingsDto(req.orderId, req.fromPointNumberToPointNumber)
+                    ).map { it.toSuccessHttpResponse() }
+                ).also { log.info("reorder order trackings: $req") }
+        }
+
+//    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+//    @Operation(
+//        method = "updateOrderTracking",
+//        summary = "Update order tracking",
+//        operationId = "updateOrderTracking",
+//        description = "Update order tracking"
+//    )
+//    suspend fun updateOrderTracking(
+//        @Valid @RequestBody req: UpdateOrderTrackingDto
+//    ): ResponseEntity<OrderTracking> =
+//        withTimeout(TIMEOUT_MILLIS) {
+//            ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(orderTrackingCoroutineService.update(req))
+//                .also { log.info("updated order tracking: $req") }
+//        }
+
+    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "updateOrderTracking",
+        summary = "Update order tracking",
+        operationId = "updateOrderTracking",
+        description = "Update order tracking"
+    )
+    suspend fun updateOrderTracking(
+        @Valid @RequestBody req: UpdateOrderTrackingDto
+    ): ResponseEntity<SuccessOrderTrackingResponse> =
+        withTimeout(TIMEOUT_MILLIS) {
+
+            println(req)
+
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.update(req)?.toSuccessHttpResponse())
+                .also { log.info("updated order tracking: $req") }
+        }
 
     @DeleteMapping(path = ["/{orderId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
@@ -118,29 +227,31 @@ class OrderTrackingCoroutineController(
     )
     suspend fun deleteAllByOrderId(
         @PathVariable(required = true) orderId: Long
-    ): ResponseEntity<List<OrderTracking>> = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity
-            .status(HttpStatus.GONE)
-            .body(orderTrackingCoroutineService.deleteAllByOrderId(orderId))
-            .also { log.info("deleted order tracking: $orderId") }
-    }
+    ): ResponseEntity<List<SuccessOrderTrackingResponse>> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(orderTrackingCoroutineService.deleteAllByOrderId(orderId).map { it.toSuccessHttpResponse() })
+                .also { log.info("deleted order tracking: $orderId") }
+        }
 
     @DeleteMapping(path = ["/{orderId}/{pointNumber}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
-        method = "deleteByOrderTrackingIdentifier",
+        method = "deleteByOrderTrackingExternalId",
         summary = "Delete order tracking by order id and point number",
-        operationId = "deleteByOrderTrackingIdentifier",
+        operationId = "deleteByOrderTrackingExternalId",
         description = "Delete order tracking by order id and point number"
     )
-    suspend fun deleteByOrderTrackingIdentifier(
+    suspend fun deleteByOrderTrackingExternalId(
         @PathVariable(required = true) orderId: Long,
         @PathVariable(required = true) pointNumber: Int
-    ): ResponseEntity<OrderTracking> = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity
-            .status(HttpStatus.GONE)
-            .body(orderTrackingCoroutineService.deleteByOrderTrackingIdentifier(orderId, pointNumber))
-            .also { log.info("deleted order tracking: $orderId, $pointNumber") }
-    }
+    ): ResponseEntity<SuccessOrderTrackingResponse> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(orderTrackingCoroutineService.deleteByExternalId(orderId, pointNumber)?.toSuccessHttpResponse())
+                .also { log.info("deleted order tracking: $orderId, $pointNumber") }
+        }
 
     companion object {
         private val log = LoggerFactory.getLogger(OrderTrackingReactiveController::class.java)
