@@ -1,6 +1,9 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
+import com.vasiliytemniy.deliverymicroservice.utils.parseOptionalDate
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 
 data class UpdateOrderTrackingDto (
@@ -19,10 +22,14 @@ data class UpdateOrderTrackingDto (
     val estimatedDeliveryAt: String?,
     val deliveredAt: String?
 ) {
+
+    val parsedEstimatedDeliveryAt: LocalDateTime? = parseOptionalDate(estimatedDeliveryAt)
+    val parsedDeliveredAt: LocalDateTime? = parseOptionalDate(deliveredAt)
+
     companion object
 }
 
-fun UpdateOrderTrackingDto.Companion.of(request: OrderTracking.UpdateOrderTrackingRequest): UpdateOrderTrackingDto {
+fun UpdateOrderTrackingDto.Companion.of(request: OrderTracking.UpdateRequest): UpdateOrderTrackingDto {
     return UpdateOrderTrackingDto(
         orderId = request.orderId,
         pointNumber = request.pointNumber,

@@ -13,6 +13,6 @@ data class GetOrderTrackingsByOrderIdDto(
 }
 
 
-fun GetOrderTrackingsByOrderIdDto.Companion.of(request: OrderTracking.GetOrderTrackingsByOrderIdRequest): GetOrderTrackingsByOrderIdDto {
+fun GetOrderTrackingsByOrderIdDto.Companion.of(request: OrderTracking.GetPageByOrderIdRequest): GetOrderTrackingsByOrderIdDto {
     return GetOrderTrackingsByOrderIdDto(request.orderId, PageRequest.of(request.page, request.size))
 }

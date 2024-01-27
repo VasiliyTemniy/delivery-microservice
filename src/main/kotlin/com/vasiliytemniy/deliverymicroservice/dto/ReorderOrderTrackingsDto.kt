@@ -14,7 +14,7 @@ data class ReorderOrderTrackingsDto(
     companion object
 }
 
-fun ReorderOrderTrackingsDto.Companion.of(request: OrderTracking.ReorderOrderTrackingsRequest): ReorderOrderTrackingsDto {
+fun ReorderOrderTrackingsDto.Companion.of(request: OrderTracking.ReorderRequest): ReorderOrderTrackingsDto {
     return ReorderOrderTrackingsDto(
         request.orderId,
         request.fromPointNumberToPointNumberList.associate { it.key to it.value }
