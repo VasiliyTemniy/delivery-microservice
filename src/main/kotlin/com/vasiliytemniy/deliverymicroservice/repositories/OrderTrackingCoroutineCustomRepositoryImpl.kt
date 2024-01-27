@@ -30,7 +30,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
     private val databaseClient: DatabaseClient
 ) : OrderTrackingCoroutineCustomRepository {
 
-    override suspend fun findPageByOrderId(orderId: Long, pageable: Pageable): Page<OrderTracking> =
+    override suspend fun findPageByOrderId(orderId: String, pageable: Pageable): Page<OrderTracking> =
         withContext(Dispatchers.IO) {
             val query = Query.query(Criteria.where(ORDER_ID).isEqual(orderId))
 
@@ -53,7 +53,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
         }
 
     override suspend fun findPageByCarrierId(
-        carrierId: Long,
+        carrierId: String,
         pageable: Pageable,
         filterActive: Boolean
     ): Page<OrderTracking> =
@@ -82,7 +82,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
                 .also { log.debug("pagination: {}", it) }
         }
 
-    override fun findAllByCarrierId(carrierId: Long, filterActive: Boolean): Flow<OrderTracking> =
+    override fun findAllByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking> =
         if (filterActive) {
             template.select(
                 Query.query(Criteria.where("carrier_id").isEqual(carrierId)),

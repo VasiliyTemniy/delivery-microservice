@@ -19,12 +19,12 @@ service OrderTrackingService {
 
 message OrderTrackingData {
   string id = 1;
-  int64 orderId = 2;
+  string orderId = 2;
   int32 pointNumber = 3;
-  int64 fromFacilityId = 4;
-  int64 destinationId = 5;
+  string fromFacilityId = 4;
+  string destinationId = 5;
   string destinationType = 6;
-  int64 carrierId = 7;
+  string carrierId = 7;
   string status = 8;
   int32 deliveryCost = 9;
   string currency = 10;
@@ -38,18 +38,18 @@ message OrderTrackingData {
 }
 
 message OrderTrackingExternalId {
-  int64 orderId = 1;
+  string orderId = 1;
   int32 pointNumber = 2;
 }
 
 // Requests
 
 message CreateRequest {
-  int64 orderId = 1;
-  int64 fromFacilityId = 2;
-  int64 destinationId = 3;
+  string orderId = 1;
+  string fromFacilityId = 2;
+  string destinationId = 3;
   string destinationType = 4;
-  int64 carrierId = 5;
+  string carrierId = 5;
   string status = 6;
   int32 deliveryCost = 7;
   string currency = 8;
@@ -62,39 +62,39 @@ message CreateRequest {
 }
 
 message GetStreamByOrderIdRequest {
-  int64 orderId = 1;
+  string orderId = 1;
 }
 
 message GetPageByOrderIdRequest {
-  int64 orderId = 1;
+  string orderId = 1;
   int32 page = 2;
   int32 size = 3;
 }
 
 message GetLastByOrderIdRequest {
-  int64 orderId = 1;
+  string orderId = 1;
   bool findLast = 2;
 }
 
 message GetStreamByCarrierIdRequest {
-  int64 carrierId = 1;
+  string carrierId = 1;
   bool filterActive = 2;
 }
 
 message GetPageByCarrierIdRequest {
-  int64 carrierId = 1;
+  string carrierId = 1;
   int32 page = 2;
   int32 size = 3;
   bool filterActive = 4;
 }
 
 message UpdateRequest {
-  int64 orderId = 1;
+  string orderId = 1;
   int32 pointNumber = 2;
-  int64 fromFacilityId = 3;
-  int64 destinationId = 4;
+  string fromFacilityId = 3;
+  string destinationId = 4;
   string destinationType = 5;
-  int64 carrierId = 6;
+  string carrierId = 6;
   string status = 7;
   int32 deliveryCost = 8;
   string currency = 9;
@@ -116,16 +116,16 @@ message ReorderRequest {
     int32 key = 1;
     int32 value = 2;
   }
-  int64 orderId = 1;
+  string orderId = 1;
   repeated MapFieldEntry fromPointNumberToPointNumber = 2;
 }
 
 message DeleteByOrderIdRequest {
-  int64 orderId = 1;
+  string orderId = 1;
 }
 
 message DeleteByExternalIdRequest {
-  int64 orderId = 1;
+  string orderId = 1;
   int32 pointNumber = 2;
 }
 

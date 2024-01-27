@@ -5,7 +5,7 @@ import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
 
 
 data class OrderTrackingExternalIdDto(
-    val orderId: Long,
+    val orderId: String,
     val pointNumber: Int
 ) {
     companion object

@@ -18,12 +18,12 @@ import java.util.*
 @Table(schema = "delivery", name = "order_trackings")
 data class OrderTracking(
     @Column(ID) @Id var id: UUID?,
-    @Column(ORDER_ID) var orderId: Long = 0,
+    @Column(ORDER_ID) var orderId: String = "",
     @Column(POINT_NUMBER) var pointNumber: Int? = null,
-    @Column(FROM_FACILITY_ID) var fromFacilityId: Long = 0,
-    @Column(DESTINATION_ID) var destinationId: Long = 0,
+    @Column(FROM_FACILITY_ID) var fromFacilityId: String = "",
+    @Column(DESTINATION_ID) var destinationId: String = "",
     @get:Size(min = 3, max = 60) @Column(DESTINATION_TYPE) var destinationType: String = "",
-    @Column(CARRIER_ID) var carrierId: Long = 0,
+    @Column(CARRIER_ID) var carrierId: String = "",
     @get:Size(min = 3, max = 60) @Column(STATUS) var status: String = "",
     @Column(DELIVERY_COST) var deliveryCost: Int = 0,
     @get:Size(min = 3, max = 3) @Column(CURRENCY) var currency: String = "",

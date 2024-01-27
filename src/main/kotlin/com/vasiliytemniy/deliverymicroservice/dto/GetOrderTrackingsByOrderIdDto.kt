@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable
 
 
 data class GetOrderTrackingsByOrderIdDto(
-    val orderId: Long,
+    val orderId: String,
     val pageable: Pageable
 ) {
     companion object

@@ -4,12 +4,12 @@ import java.util.*
 
 data class SuccessOrderTrackingResponse(
     val id: UUID?,
-    val orderId: Long?,
+    val orderId: String?,
     val pointNumber: Int?,
-    val fromFacilityId: Long?,
-    val destinationId: Long?,
+    val fromFacilityId: String?,
+    val destinationId: String?,
     val destinationType: String?,
-    val carrierId: Long?,
+    val carrierId: String?,
     val status: String?,
     val deliveryCost: Int?,
     val currency: String?,

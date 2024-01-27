@@ -3,7 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.dto
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
 
 data class ReorderOrderTrackingsDto(
-    val orderId: Long,
+    val orderId: String,
     val fromPointNumberToPointNumber: Map<Int, Int>
 ) {
 

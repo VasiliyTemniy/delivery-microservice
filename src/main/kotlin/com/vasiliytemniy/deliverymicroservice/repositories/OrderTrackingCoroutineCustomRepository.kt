@@ -12,10 +12,10 @@ import java.time.LocalDateTime
 @Repository
 interface OrderTrackingCoroutineCustomRepository {
 
-    suspend fun findPageByOrderId(orderId: Long, pageable: Pageable): Page<OrderTracking>
+    suspend fun findPageByOrderId(orderId: String, pageable: Pageable): Page<OrderTracking>
 
-    suspend fun findPageByCarrierId(carrierId: Long, pageable: Pageable, filterActive: Boolean): Page<OrderTracking>
+    suspend fun findPageByCarrierId(carrierId: String, pageable: Pageable, filterActive: Boolean): Page<OrderTracking>
 
-    fun findAllByCarrierId(carrierId: Long, filterActive: Boolean): Flow<OrderTracking>
+    fun findAllByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking>
 
 }

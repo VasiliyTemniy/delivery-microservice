@@ -12,13 +12,13 @@ interface OrderTrackingCoroutineService {
 
     suspend fun create(orderTracking: OrderTracking): OrderTracking
 
-    fun getFlowByOrderId(orderId: Long): Flow<OrderTracking>
+    fun getFlowByOrderId(orderId: String): Flow<OrderTracking>
 
     suspend fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Page<OrderTracking>
 
-    suspend fun getLastByOrderId(orderId: Long): OrderTracking?
+    suspend fun getLastByOrderId(orderId: String): OrderTracking?
 
-    fun getFlowByCarrierId(carrierId: Long, filterActive: Boolean): Flow<OrderTracking>
+    fun getFlowByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking>
 
     suspend fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Page<OrderTracking>
 
@@ -28,8 +28,8 @@ interface OrderTrackingCoroutineService {
 
     suspend fun update(requestDto: UpdateOrderTrackingDto): OrderTracking?
 
-    suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking>
+    suspend fun deleteAllByOrderId(orderId: String): List<OrderTracking>
 
-    suspend fun deleteByExternalId(orderId: Long, pointNumber: Int): OrderTracking?
+    suspend fun deleteByExternalId(orderId: String, pointNumber: Int): OrderTracking?
 
 }

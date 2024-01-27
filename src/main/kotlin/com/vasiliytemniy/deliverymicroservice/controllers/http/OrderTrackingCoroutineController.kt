@@ -50,7 +50,7 @@ class OrderTrackingCoroutineController(
         description = "Get stream of all order trackings by order id"
     )
     fun getFlowOrderTrackingsByOrderId(
-        @PathVariable(required = true) orderId: Long,
+        @PathVariable(required = true) orderId: String,
     ): Flow<SuccessOrderTrackingResponse> =
         orderTrackingCoroutineService.getFlowByOrderId(orderId)
             .map { it.toSuccessHttpResponse() }
@@ -64,7 +64,7 @@ class OrderTrackingCoroutineController(
         description = "Get order trackings by order id with pagination"
     )
     suspend fun getPageOrderTrackingsByOrderId(
-        @PathVariable(required = true) orderId: Long,
+        @PathVariable(required = true) orderId: String,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int
     ): Page<SuccessOrderTrackingResponse> =
@@ -81,7 +81,7 @@ class OrderTrackingCoroutineController(
         description = "Get last order tracking by order id"
     )
     suspend fun getLastOrderTrackingByOrderId(
-        @PathVariable(required = true) orderId: Long
+        @PathVariable(required = true) orderId: String
     ): ResponseEntity<SuccessOrderTrackingResponse?> =
         withTimeout(TIMEOUT_MILLIS) {
             ResponseEntity.status(HttpStatus.OK)
@@ -97,7 +97,7 @@ class OrderTrackingCoroutineController(
         description = "Get order trackings by carrier id with pagination"
     )
     fun getFlowOrderTrackingsByCarrierId(
-        @PathVariable(required = true) carrierId: Long,
+        @PathVariable(required = true) carrierId: String,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int,
         @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
@@ -114,7 +114,7 @@ class OrderTrackingCoroutineController(
         description = "Get order trackings by carrier id with pagination"
     )
     suspend fun getPageOrderTrackingsByCarrierId(
-        @PathVariable(required = true) carrierId: Long,
+        @PathVariable(required = true) carrierId: String,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int,
         @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
@@ -226,7 +226,7 @@ class OrderTrackingCoroutineController(
         description = "Delete all order trackings by order id"
     )
     suspend fun deleteAllByOrderId(
-        @PathVariable(required = true) orderId: Long
+        @PathVariable(required = true) orderId: String
     ): ResponseEntity<List<SuccessOrderTrackingResponse>> =
         withTimeout(TIMEOUT_MILLIS) {
             ResponseEntity
@@ -243,7 +243,7 @@ class OrderTrackingCoroutineController(
         description = "Delete order tracking by order id and point number"
     )
     suspend fun deleteByOrderTrackingExternalId(
-        @PathVariable(required = true) orderId: Long,
+        @PathVariable(required = true) orderId: String,
         @PathVariable(required = true) pointNumber: Int
     ): ResponseEntity<SuccessOrderTrackingResponse> =
         withTimeout(TIMEOUT_MILLIS) {

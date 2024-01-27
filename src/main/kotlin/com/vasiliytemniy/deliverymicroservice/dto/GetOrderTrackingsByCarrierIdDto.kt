@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable
 
 
 data class GetOrderTrackingsByCarrierIdDto(
-    val carrierId: Long,
+    val carrierId: String,
     val pageable: Pageable,
     val filterActive: Boolean
 ) {

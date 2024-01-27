@@ -11,31 +11,31 @@ import java.time.LocalDateTime
 
 
 @Repository
-interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking, Long> {
+interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking, String> {
 
-    fun findPageByOrderId(orderId: Long, pageable: Pageable): Flux<OrderTracking>
+    fun findPageByOrderId(orderId: String, pageable: Pageable): Flux<OrderTracking>
 
-    fun findAllByOrderId(orderId: Long): Flux<OrderTracking>
+    fun findAllByOrderId(orderId: String): Flux<OrderTracking>
 
     @Query(SqlQueries.FIND_LAST_BY_ORDER_ID_SQL_QUERY)
-    fun findLastByOrderId(orderId: Long): Mono<OrderTracking>
+    fun findLastByOrderId(orderId: String): Mono<OrderTracking>
 
-    fun findPageByCarrierId(carrierId: Long, pageable: Pageable): Flux<OrderTracking>
+    fun findPageByCarrierId(carrierId: String, pageable: Pageable): Flux<OrderTracking>
 
-    fun findAllByCarrierId(carrierId: Long): Flux<OrderTracking>
+    fun findAllByCarrierId(carrierId: String): Flux<OrderTracking>
 
     // A tricky workaround to filter active order trackings with deliveredAt without custom impl
-    fun findPageByCarrierIdAndDeliveredAt(carrierId: Long, deliveredAt: LocalDateTime?, pageable: Pageable): Flux<OrderTracking>
-    fun findAllByCarrierIdAndDeliveredAt(carrierId: Long, deliveredAt: LocalDateTime?): Flux<OrderTracking>
+    fun findPageByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?, pageable: Pageable): Flux<OrderTracking>
+    fun findAllByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?): Flux<OrderTracking>
 
     @Query(SqlQueries.UPDATE_ORDER_TRACKING_SQL_QUERY)
     fun update(
-        orderId: Long,
+        orderId: String,
         pointNumber: Int,
-        fromFacilityId: Long,
-        destinationId: Long,
+        fromFacilityId: String,
+        destinationId: String,
         destinationType: String,
-        carrierId: Long,
+        carrierId: String,
         status: String,
         deliveryCost: Int,
         currency: String,
@@ -48,16 +48,16 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
 
     @Query(SqlQueries.SET_ORDER_TRACKING_STATUS_SQL_QUERY)
     fun setStatus(
-        orderId: Long,
+        orderId: String,
         pointNumber: Int,
         status: String,
         deliveredAt: LocalDateTime?
     ): Mono<OrderTracking>
 
     @Query(SqlQueries.DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY)
-    fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking>
+    fun deleteAllByOrderId(orderId: String): Flux<OrderTracking>
 
     @Query(SqlQueries.DELETE_ORDER_TRACKING_SQL_QUERY)
-    fun deleteByExternalId(orderId: Long, pointNumber: Int): Mono<OrderTracking>
+    fun deleteByExternalId(orderId: String, pointNumber: Int): Mono<OrderTracking>
 
 }

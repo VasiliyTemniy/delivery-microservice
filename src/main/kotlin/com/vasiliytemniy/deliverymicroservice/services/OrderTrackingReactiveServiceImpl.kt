@@ -28,11 +28,11 @@ class OrderTrackingReactiveServiceImpl(
             .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
-    override fun getAllByOrderId(orderId: Long): Flux<OrderTracking> =
+    override fun getAllByOrderId(orderId: String): Flux<OrderTracking> =
         orderTrackingReactiveRepository.findAllByOrderId(orderId)
 
     @Transactional(readOnly = true)
-    override fun getLastByOrderId(orderId: Long): Mono<OrderTracking> =
+    override fun getLastByOrderId(orderId: String): Mono<OrderTracking> =
         orderTrackingReactiveRepository.findLastByOrderId(orderId)
 
     @Transactional(readOnly = true)
@@ -49,7 +49,7 @@ class OrderTrackingReactiveServiceImpl(
                 .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
-    override fun getAllByCarrierId(carrierId: Long, filterActive: Boolean): Flux<OrderTracking> =
+    override fun getAllByCarrierId(carrierId: String, filterActive: Boolean): Flux<OrderTracking> =
         if (filterActive)
             orderTrackingReactiveRepository.findAllByCarrierIdAndDeliveredAt(carrierId, null)
         else
@@ -94,11 +94,11 @@ class OrderTrackingReactiveServiceImpl(
         )
 
     @Transactional
-    override fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking> =
+    override fun deleteAllByOrderId(orderId: String): Flux<OrderTracking> =
         orderTrackingReactiveRepository.deleteAllByOrderId(orderId)
 
     @Transactional
-    override fun deleteByExternalId(orderId: Long, pointNumber: Int): Mono<OrderTracking> =
+    override fun deleteByExternalId(orderId: String, pointNumber: Int): Mono<OrderTracking> =
         // TODO!: Reorder after deleting
         orderTrackingReactiveRepository.deleteByExternalId(orderId, pointNumber)
 }

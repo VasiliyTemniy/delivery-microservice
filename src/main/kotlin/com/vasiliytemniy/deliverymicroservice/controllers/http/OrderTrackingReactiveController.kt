@@ -48,7 +48,7 @@ class OrderTrackingReactiveController(
         description = "Get order trackings by order id with pagination"
     )
     fun getPageOrderTrackingsByOrderId(
-        @PathVariable(required = true) orderId: Long,
+        @PathVariable(required = true) orderId: String,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int
     ): ResponseEntity<Mono<Page<SuccessOrderTrackingResponse>>> =
@@ -68,7 +68,7 @@ class OrderTrackingReactiveController(
         description = "Get all order trackings by order id"
     )
     fun getAllOrderTrackingsByOrderId(
-        @PathVariable(required = true) orderId: Long
+        @PathVariable(required = true) orderId: String
     ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.OK)
             .body(orderTrackingReactiveService.getAllByOrderId(orderId)
@@ -83,7 +83,7 @@ class OrderTrackingReactiveController(
         description = "Get last order tracking by order id"
     )
     fun getLastOrderTrackingByOrderId(
-        @PathVariable(required = true) orderId: Long
+        @PathVariable(required = true) orderId: String
     ): ResponseEntity<Mono<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.OK)
             .body(orderTrackingReactiveService.getLastByOrderId(orderId)
@@ -98,7 +98,7 @@ class OrderTrackingReactiveController(
         description = "Get order trackings by carrier id with pagination"
     )
     fun getPageOrderTrackingsByCarrierId(
-        @PathVariable(required = true) carrierId: Long,
+        @PathVariable(required = true) carrierId: String,
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int,
         @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
@@ -119,7 +119,7 @@ class OrderTrackingReactiveController(
         description = "Get all order trackings by carrier id"
     )
     fun getAllOrderTrackingsByCarrierId(
-        @PathVariable(required = true) carrierId: Long,
+        @PathVariable(required = true) carrierId: String,
         @RequestParam(name = "filter-active", defaultValue = "true") filterActive: Boolean
     ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.OK)
@@ -180,7 +180,7 @@ class OrderTrackingReactiveController(
         description = "Delete all order trackings by order id"
     )
     fun deleteAllByOrderId(
-        @PathVariable(required = true) orderId: Long
+        @PathVariable(required = true) orderId: String
     ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.GONE)
             .body(orderTrackingReactiveService.deleteAllByOrderId(orderId)
@@ -195,7 +195,7 @@ class OrderTrackingReactiveController(
         description = "Delete order tracking by order id and point number"
     )
     fun deleteByOrderTrackingExternalId(
-        @PathVariable(required = true) orderId: Long, @PathVariable(required = true) pointNumber: Int
+        @PathVariable(required = true) orderId: String, @PathVariable(required = true) pointNumber: Int
     ): ResponseEntity<Mono<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.GONE)
             .body(orderTrackingReactiveService.deleteByExternalId(orderId, pointNumber)

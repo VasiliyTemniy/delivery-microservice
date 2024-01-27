@@ -23,7 +23,7 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional(readOnly = true)
-    override fun getFlowByOrderId(orderId: Long): Flow<OrderTracking> =
+    override fun getFlowByOrderId(orderId: String): Flow<OrderTracking> =
         orderTrackingCoroutineRepository.findAllByOrderId(orderId)
 
     @Transactional(readOnly = true)
@@ -33,13 +33,13 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional(readOnly = true)
-    override suspend fun getLastByOrderId(orderId: Long): OrderTracking? =
+    override suspend fun getLastByOrderId(orderId: String): OrderTracking? =
         withContext(Dispatchers.IO) {
             orderTrackingCoroutineRepository.findLastByOrderId(orderId)
         }
 
     @Transactional(readOnly = true)
-    override fun getFlowByCarrierId(carrierId: Long, filterActive: Boolean): Flow<OrderTracking> =
+    override fun getFlowByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking> =
         orderTrackingCoroutineRepository.findAllByCarrierId(carrierId, filterActive)
 
     @Transactional(readOnly = true)
@@ -89,13 +89,13 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional
-    override suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking> =
+    override suspend fun deleteAllByOrderId(orderId: String): List<OrderTracking> =
         withContext(Dispatchers.IO) {
             orderTrackingCoroutineRepository.deleteAllByOrderId(orderId)
         }
 
     @Transactional
-    override suspend fun deleteByExternalId(orderId: Long, pointNumber: Int) =
+    override suspend fun deleteByExternalId(orderId: String, pointNumber: Int) =
         withContext(Dispatchers.IO) {
             // TODO!: Reorder after deleting
             orderTrackingCoroutineRepository.deleteByExternalId(orderId, pointNumber)

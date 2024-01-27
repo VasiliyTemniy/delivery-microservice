@@ -15,13 +15,13 @@ interface OrderTrackingReactiveService {
 
     fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>>
 
-    fun getAllByOrderId(orderId: Long): Flux<OrderTracking>
+    fun getAllByOrderId(orderId: String): Flux<OrderTracking>
 
-    fun getLastByOrderId(orderId: Long): Mono<OrderTracking>
+    fun getLastByOrderId(orderId: String): Mono<OrderTracking>
 
     fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>>
 
-    fun getAllByCarrierId(carrierId: Long, filterActive: Boolean): Flux<OrderTracking>
+    fun getAllByCarrierId(carrierId: String, filterActive: Boolean): Flux<OrderTracking>
 
     fun setStatuses(requestDto: SetOrderTrackingStatusesDto): Flux<OrderTracking>
 
@@ -29,8 +29,8 @@ interface OrderTrackingReactiveService {
 
     fun update(requestDto: UpdateOrderTrackingDto): Mono<OrderTracking>
 
-    fun deleteAllByOrderId(orderId: Long): Flux<OrderTracking>
+    fun deleteAllByOrderId(orderId: String): Flux<OrderTracking>
 
-    fun deleteByExternalId(orderId: Long, pointNumber: Int): Mono<OrderTracking>
+    fun deleteByExternalId(orderId: String, pointNumber: Int): Mono<OrderTracking>
 
 }

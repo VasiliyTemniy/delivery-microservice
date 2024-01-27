@@ -9,16 +9,16 @@ import java.time.LocalDateTime
 
 
 @Repository
-interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracking, Long>, OrderTrackingCoroutineCustomRepository {
+interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracking, String>, OrderTrackingCoroutineCustomRepository {
 
-    fun findAllByOrderId(orderId: Long): Flow<OrderTracking>
+    fun findAllByOrderId(orderId: String): Flow<OrderTracking>
 
     @Query(SqlQueries.FIND_LAST_BY_ORDER_ID_SQL_QUERY)
-    suspend fun findLastByOrderId(orderId: Long): OrderTracking?
+    suspend fun findLastByOrderId(orderId: String): OrderTracking?
 
     @Query(SqlQueries.SET_ORDER_TRACKING_STATUS_SQL_QUERY)
     suspend fun setStatus(
-        orderId: Long,
+        orderId: String,
         pointNumber: Int,
         status: String,
         deliveredAt: LocalDateTime?
@@ -26,12 +26,12 @@ interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracki
 
     @Query(SqlQueries.UPDATE_ORDER_TRACKING_SQL_QUERY)
     suspend fun update(
-        orderId: Long,
+        orderId: String,
         pointNumber: Int,
-        fromFacilityId: Long,
-        destinationId: Long,
+        fromFacilityId: String,
+        destinationId: String,
         destinationType: String,
-        carrierId: Long,
+        carrierId: String,
         status: String,
         deliveryCost: Int,
         currency: String,
@@ -43,9 +43,9 @@ interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracki
     ): OrderTracking?
 
     @Query(SqlQueries.DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY)
-    suspend fun deleteAllByOrderId(orderId: Long): List<OrderTracking>
+    suspend fun deleteAllByOrderId(orderId: String): List<OrderTracking>
 
     @Query(SqlQueries.DELETE_ORDER_TRACKING_SQL_QUERY)
-    suspend fun deleteByExternalId(orderId: Long, pointNumber: Int): OrderTracking?
+    suspend fun deleteByExternalId(orderId: String, pointNumber: Int): OrderTracking?
 
 }
