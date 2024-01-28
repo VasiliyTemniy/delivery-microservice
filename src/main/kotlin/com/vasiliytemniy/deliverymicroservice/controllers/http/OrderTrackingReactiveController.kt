@@ -135,10 +135,10 @@ class OrderTrackingReactiveController(
         description = "Set order tracking statuses"
     )
     fun setOrderTrackingStatuses(
-        @Valid @RequestBody req: SetOrderTrackingStatusesDto
+        @RequestBody req: Any
     ): ResponseEntity<Flux<SuccessOrderTrackingResponse>> =
         ResponseEntity.status(HttpStatus.OK)
-            .body(orderTrackingReactiveService.setStatuses(req)
+            .body(orderTrackingReactiveService.setStatuses(SetOrderTrackingStatusesDto.of(req))
                 .flatMap { Flux.just(it.toSuccessHttpResponse()) })
             .also { log.info("set order tracking statuses: $req") }
 

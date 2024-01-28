@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.util.LinkedHashMap
 
 @Tag(name = "Order Tracking", description = "Order Tracking REST API")
 @RestController
@@ -134,7 +135,6 @@ class OrderTrackingCoroutineController(
                 .also { log.info("response: $it") }
         }
 
-
     @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "setOrderTrackingStatuses",
@@ -142,16 +142,17 @@ class OrderTrackingCoroutineController(
         operationId = "setOrderTrackingStatuses",
         description = "Set order tracking statuses"
     )
-    suspend fun setOrderTrackingStatus(
-        @Valid @RequestBody req: SetOrderTrackingStatusesDto
-    ) : ResponseEntity<List<SuccessOrderTrackingResponse>> = withTimeout(TIMEOUT_MILLIS) {
-        ResponseEntity
-            .status(HttpStatus.OK)
-            .body(orderTrackingCoroutineService.setStatuses(
-                SetOrderTrackingStatusesDto(req.orderTrackingExternalIds, req.status, req.deliveredAt)
-            ).map { it.toSuccessHttpResponse() }
-        ).also { log.info("set order tracking status: $req") }
-    }
+    suspend fun setOrderTrackingStatuses(
+        @RequestBody req: Any
+    ) : ResponseEntity<List<SuccessOrderTrackingResponse>> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.setStatuses(
+                    SetOrderTrackingStatusesDto.of(req)
+                ).map { it.toSuccessHttpResponse() }
+            ).also { log.info("set order tracking status: $req") }
+        }
 
     @PutMapping(path = ["/reorder"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
