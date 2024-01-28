@@ -8,6 +8,6 @@ fun parseOptionalDate(request: String?): LocalDateTime? {
     return if (request == null || request == "" || request == "null") {
         null
     } else {
-        LocalDateTime.parse(request, DateTimeFormatter.ISO_DATE)
+        LocalDateTime.parse(request, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 }
