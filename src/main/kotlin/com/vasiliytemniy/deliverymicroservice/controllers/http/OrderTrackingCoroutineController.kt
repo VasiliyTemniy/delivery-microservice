@@ -234,6 +234,8 @@ class OrderTrackingCoroutineController(
     )
     suspend fun deleteAll(): ResponseEntity<Nothing> =
         withTimeout(TIMEOUT_MILLIS) {
+            orderTrackingCoroutineService.deleteAll()
+
             ResponseEntity
                 .status(HttpStatus.GONE)
                 .body(null)
