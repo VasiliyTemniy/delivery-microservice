@@ -141,7 +141,7 @@ message ManyOrderTrackingsResponse {
 }
 
 message PageOrderTrackingsResponse {
-  repeated OrderTrackingData orderTracking = 1;
+  repeated OrderTrackingData content = 1;
   int32 page = 2;
   int32 size = 3;
   int32 totalElements = 4;

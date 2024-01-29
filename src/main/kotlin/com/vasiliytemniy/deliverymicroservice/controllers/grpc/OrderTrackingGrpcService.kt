@@ -126,6 +126,6 @@ fun Page<OrderTracking>.toPageOrderTrackingsResponse(): PageOrderTrackingsRespon
         .setTotalPages(this.totalPages)
         .setPage(this.pageable.pageNumber)
         .setSize(this.pageable.pageSize)
-        .addAllOrderTracking(this.content.map { it.toProto() })
+        .addAllContent(this.content.map { it.toProto() })
         .build()
 }
