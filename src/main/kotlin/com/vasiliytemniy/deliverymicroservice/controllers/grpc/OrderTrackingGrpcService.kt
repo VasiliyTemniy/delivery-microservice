@@ -30,7 +30,7 @@ class OrderTrackingGrpcService(
         withTimeout(TIMEOUT_MILLIS) {
             orderTrackingService.create(validate(OrderTracking.of(request)))
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it.toProto()).build() }
-                .also { log.info("created order tracking: $request") }
+                .also { log.info("create response: $it") }
         }
 
     override fun getStreamByOrderId(request: GetStreamByOrderIdRequest): Flow<OrderTrackingResponse> =
@@ -41,13 +41,13 @@ class OrderTrackingGrpcService(
     override suspend fun getPageByOrderId(request: GetPageByOrderIdRequest): PageOrderTrackingsResponse =
         orderTrackingService.getPageByOrderId(validate(GetOrderTrackingsByOrderIdDto.of(request)))
             .toPageOrderTrackingsResponse()
-            .also { log.info("got order trackings: $request") }
+            .also { log.info("getPageByOrderId response: $it") }
 
     override suspend fun getLastByOrderId(request: GetLastByOrderIdRequest): OrderTrackingResponse =
         withTimeout(TIMEOUT_MILLIS) {
             orderTrackingService.getLastByOrderId(validate(request.orderId))?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
-                .also { log.info("got last order tracking: $request") }
+                .also { log.info("getLastByOrderId response: $it") }
         }
 
     override fun getStreamByCarrierId(request: GetStreamByCarrierIdRequest): Flow<OrderTrackingResponse> =
@@ -58,7 +58,7 @@ class OrderTrackingGrpcService(
     override suspend fun getPageByCarrierId(request: GetPageByCarrierIdRequest): PageOrderTrackingsResponse =
         orderTrackingService.getPageByCarrierId(validate(GetOrderTrackingsByCarrierIdDto.of(request)))
             .toPageOrderTrackingsResponse()
-            .also { log.info("got order trackings: $request") }
+            .also { log.info("getPageByCarrierId response: $it") }
 
     override suspend fun setStatuses(request: SetStatusesRequest): ManyOrderTrackingsResponse =
         withTimeout(TIMEOUT_MILLIS) {
@@ -66,6 +66,7 @@ class OrderTrackingGrpcService(
                 orderTrackingService.setStatuses(validate(SetOrderTrackingStatusesDto.of(request)))
                     .map { it.toProto() }
             ).build()
+                .also { log.info("setStatuses response: $it") }
         }
 
     override suspend fun reorder(request: ReorderRequest): ManyOrderTrackingsResponse =
@@ -74,13 +75,14 @@ class OrderTrackingGrpcService(
                 orderTrackingService.reorder(validate(ReorderOrderTrackingsDto.of(request)))
                     .map { it.toProto() }
             ).build()
+                .also { log.info("reorder response: $it") }
         }
 
     override suspend fun update(request: UpdateRequest): OrderTrackingResponse =
         withTimeout(TIMEOUT_MILLIS) {
             orderTrackingService.update(validate(UpdateOrderTrackingDto.of(request)))?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
-                .also { log.info("updated order tracking: $request") }
+                .also { log.info("update response: $it") }
         }
 
     override suspend fun deleteByOrderId(request: DeleteByOrderIdRequest): ManyOrderTrackingsResponse =
@@ -89,6 +91,7 @@ class OrderTrackingGrpcService(
                 orderTrackingService.deleteAllByOrderId(validate(request.orderId))
                     .map { it.toProto() }
             ).build()
+                .also { log.info("deleteByOrderId response: $it") }
         }
 
     override suspend fun deleteByExternalId(request: DeleteByExternalIdRequest): OrderTrackingResponse =
@@ -97,7 +100,7 @@ class OrderTrackingGrpcService(
                 validate(request.orderId), validate(request.pointNumber)
             )?.toProto()
                 .let { OrderTrackingResponse.newBuilder().setOrderTracking(it).build() }
-                .also { log.info("deleted order tracking: $request") }
+                .also { log.info("deleteByExternalId response: $it") }
         }
 
     private fun <T> validate(data: T): T {
