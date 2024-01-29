@@ -26,7 +26,17 @@ class OrderTrackingCoroutineServiceImpl(
     @Transactional
     override suspend fun create(@Valid orderTracking: OrderTracking): OrderTracking =
         withContext(Dispatchers.IO) {
-            orderTrackingCoroutineRepository.save(orderTracking)
+            var savedOrderTracking = orderTrackingCoroutineRepository.save(orderTracking)
+
+            // Workaround for returned order tracking's point number - applied by db trigger after db save
+            // For the case if request orderTracking doesn't have explicit point number
+            if (orderTracking.pointNumber == null) {
+                val foundOrderTracking = orderTrackingCoroutineRepository.findLastByOrderId(orderTracking.orderId)
+                    ?: throw OrderTrackingNotFoundException("Order tracking not found", "orderId")
+                savedOrderTracking = foundOrderTracking
+            }
+
+            savedOrderTracking
         }
 
     @Transactional(readOnly = true)

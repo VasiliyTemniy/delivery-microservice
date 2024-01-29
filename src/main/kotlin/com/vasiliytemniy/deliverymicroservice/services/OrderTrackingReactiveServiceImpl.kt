@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.services
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.dto.*
+import com.vasiliytemniy.deliverymicroservice.exceptions.OrderTrackingNotFoundException
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingReactiveRepository
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -17,8 +18,17 @@ class OrderTrackingReactiveServiceImpl(
 ) : OrderTrackingReactiveService {
 
     @Transactional
-    override fun create(@Valid orderTracking: OrderTracking): Mono<OrderTracking> =
-        orderTrackingReactiveRepository.save(orderTracking)
+    override fun create(@Valid orderTracking: OrderTracking): Mono<OrderTracking> {
+        var savedOrderTracking = orderTrackingReactiveRepository.save(orderTracking)
+
+        // Workaround for returned order tracking's point number - applied by db trigger after db save
+        // For the case if request orderTracking doesn't have explicit point number
+        if (orderTracking.pointNumber == null) {
+            savedOrderTracking = orderTrackingReactiveRepository.findLastByOrderId(orderTracking.orderId)
+        }
+
+        return savedOrderTracking
+    }
 
     @Transactional(readOnly = true)
     override fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
