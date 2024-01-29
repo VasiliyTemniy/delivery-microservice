@@ -32,4 +32,10 @@ interface OrderTrackingCoroutineService {
 
     suspend fun deleteByExternalId(orderId: String, pointNumber: Int): OrderTracking?
 
+    suspend fun populateGeneratedTestData(
+        ordersCount: Int = 10,
+        pointsCount: Int = 10,
+        addMassControlErrorsCount: Int = 0
+    ): List<OrderTracking>
+
 }

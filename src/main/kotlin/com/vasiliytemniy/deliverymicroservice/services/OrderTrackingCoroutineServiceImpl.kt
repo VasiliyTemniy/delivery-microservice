@@ -1,9 +1,11 @@
 package com.vasiliytemniy.deliverymicroservice.services
 
+import com.github.javafaker.Faker
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.dto.*
 import com.vasiliytemniy.deliverymicroservice.exceptions.OrderTrackingNotFoundException
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingCoroutineRepository
+import com.vasiliytemniy.deliverymicroservice.utils.generateOrderTracking
 import jakarta.validation.Valid
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -11,10 +13,12 @@ import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.math.pow
 
 @Service
 class OrderTrackingCoroutineServiceImpl(
-    private val orderTrackingCoroutineRepository: OrderTrackingCoroutineRepository
+    private val orderTrackingCoroutineRepository: OrderTrackingCoroutineRepository,
+    private val faker: Faker
 ) : OrderTrackingCoroutineService {
 
     @Transactional
@@ -163,5 +167,73 @@ class OrderTrackingCoroutineServiceImpl(
             } while (shiftedOrderTracking != null)
 
             deletedOrderTracking
+        }
+
+    @Transactional
+    override suspend fun populateGeneratedTestData(
+        ordersCount: Int,
+        pointsCount: Int,
+        addMassControlErrorsCount: Int
+    ): List<OrderTracking> =
+        withContext(Dispatchers.IO) {
+
+            val orderTrackings = mutableListOf<OrderTracking>()
+
+            (0..ordersCount).map { orderIdNumber ->
+
+                // Pick starting point facility
+                var fromFacilityId = faker.number().numberBetween(1, 1000).toString()
+
+                // Fix currency for this orderId
+                val currency = faker.currency().code()
+                val currencyMultiplier = 10.toFloat().pow(faker.number().numberBetween(1, 3)).toInt()
+
+                // Pick mass control option
+                val hasMassControl =
+                    if (addMassControlErrorsCount == 0)
+                        faker.options().option(true, false)
+                    else
+                        true
+
+                val trueMassControlValue = if (hasMassControl) faker.number().numberBetween(1, 1000) else null
+                val massMeasure = if (hasMassControl) faker.options().option( "kg", "g", "t") else null
+
+                // Fill massControlValues list with true values
+                val massControlValues: MutableList<Int?> = (0..pointsCount).map { _ ->
+                    trueMassControlValue
+                }.toMutableList()
+
+                // Fill massControlValues list with erronous values
+                (0..addMassControlErrorsCount).map { _ ->
+                    massControlValues[faker.number().numberBetween(1, pointsCount)] = faker.number().numberBetween(1, 1000)
+                }
+
+                (0..pointsCount).map { pointNumber ->
+
+                    // Consider last point is not delivered yet
+                    val isDelivered = pointNumber != pointsCount
+
+                    val savedOrderTracking = orderTrackingCoroutineRepository.save(
+                        generateOrderTracking(
+                            faker,
+                            isDelivered,
+                            hasMassControl,
+                            massControlValues[pointNumber],
+                            massMeasure,
+                            orderIdNumber.toString(),
+                            pointNumber,
+                            fromFacilityId,
+                            null,
+                            currency,
+                            currencyMultiplier
+                        )
+                    )
+
+                    fromFacilityId = savedOrderTracking.destinationId
+                    orderTrackings.add(savedOrderTracking)
+                }
+            }
+
+            orderTrackings
         }
 }
