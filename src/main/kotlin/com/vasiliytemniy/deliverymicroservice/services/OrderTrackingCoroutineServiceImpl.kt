@@ -13,13 +13,15 @@ import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Page
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 import kotlin.math.pow
 
 @Service
 class OrderTrackingCoroutineServiceImpl(
     private val orderTrackingCoroutineRepository: OrderTrackingCoroutineRepository,
-    private val faker: Faker
 ) : OrderTrackingCoroutineService {
+
+    private val faker = Faker(Locale.of("en"))
 
     @Transactional
     override suspend fun create(@Valid orderTracking: OrderTracking): OrderTracking =
@@ -172,6 +174,11 @@ class OrderTrackingCoroutineServiceImpl(
     @Transactional
     override suspend fun deleteAll(): Unit =
         withContext(Dispatchers.IO) {
+            val testEnvironment = System.getProperty("testEnvironment")
+            if (testEnvironment == null || !(testEnvironment == "test" || testEnvironment == "testProduction")) {
+                throw Exception("Delete all data only in test environments; system property 'testEnvironment' must be set to 'test' or 'testProduction'")
+            }
+
             orderTrackingCoroutineRepository.deleteAll()
         }
 
@@ -182,6 +189,10 @@ class OrderTrackingCoroutineServiceImpl(
         addMassControlErrorsCount: Int
     ): List<OrderTracking> =
         withContext(Dispatchers.IO) {
+            val testEnvironment = System.getProperty("testEnvironment")
+            if (testEnvironment == null || !(testEnvironment == "test" || testEnvironment == "testProduction")) {
+                throw Exception("Populate test data only in test environments; system property 'testEnvironment' must be set to 'test' or 'testProduction'")
+            }
 
             val orderTrackings = mutableListOf<OrderTracking>()
 
