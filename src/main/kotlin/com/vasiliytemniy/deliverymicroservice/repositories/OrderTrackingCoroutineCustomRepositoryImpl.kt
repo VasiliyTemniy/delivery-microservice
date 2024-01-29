@@ -93,7 +93,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
             ).asFlow()
         }
 
-    override suspend fun setPointNumber(orderId: String, fromPointNumber: Int, toPointNumber: Int): OrderTracking =
+    override suspend fun setPointNumber(orderId: String, fromPointNumber: Int, toPointNumber: Int): OrderTracking? =
         withContext(Dispatchers.IO) {
             databaseClient.sql(SqlQueries.SET_POINT_NUMBER_SQL_QUERY)
                 .bind("orderId", orderId)
