@@ -28,6 +28,10 @@ fun generateOrderTracking(
 
     val hasMassControl = overrideHasMassControl?:faker.options().option(true, false)
 
+    val createdAtDate = faker.date().past(6, 3, TimeUnit.DAYS)
+    val createdAt = createdAtDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    val updatedAt = faker.date().future(3, TimeUnit.DAYS, createdAtDate).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+
     return OrderTracking(
         id = null,
         orderId = overrideOrderIdNumber?:faker.number().numberBetween(1, 1000).toString(),
@@ -42,9 +46,13 @@ fun generateOrderTracking(
         currencyDecimalMultiplier = overrideCurrencyMultiplier?:10.toFloat().pow(faker.number().numberBetween(1, 3)).toInt(),
         massControlValue = overrideMassControlValue?: if (hasMassControl) faker.number().numberBetween(1, 1000) else null,
         massMeasure = overrideMassMeasure?: if (hasMassControl) faker.options().option( "kg", "g", "t") else null,
-        estimatedDeliveryAt = faker.date().future(3, TimeUnit.DAYS).toInstant().atZone(
-            ZoneId.systemDefault()).toLocalDateTime(),
-        deliveredAt = if (isDelivered) faker.date().future(3, TimeUnit.DAYS).toInstant().atZone(
+        estimatedDeliveryAt = if (isDelivered)
+            faker.date().past(3, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+        else
+            faker.date().future(3, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(),
+        deliveredAt = if (isDelivered) faker.date().past(3, TimeUnit.DAYS).toInstant().atZone(
             ZoneId.systemDefault()).toLocalDateTime() else null,
+        createdAt = createdAt,
+        updatedAt = updatedAt
     )
 }
