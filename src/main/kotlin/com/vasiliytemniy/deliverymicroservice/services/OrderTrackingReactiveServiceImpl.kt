@@ -24,7 +24,7 @@ class OrderTrackingReactiveServiceImpl(
     override fun getPageByOrderId(requestDto: GetOrderTrackingsByOrderIdDto): Mono<Page<OrderTracking>> =
         orderTrackingReactiveRepository.findPageByOrderId(requestDto.orderId, requestDto.pageable)
             .collectList()
-            .zipWith(this.orderTrackingReactiveRepository.count())
+            .zipWith(this.orderTrackingReactiveRepository.countByOrderId(requestDto.orderId))
             .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
@@ -37,23 +37,14 @@ class OrderTrackingReactiveServiceImpl(
 
     @Transactional(readOnly = true)
     override fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Mono<Page<OrderTracking>> =
-        if (requestDto.filterActive)
-            orderTrackingReactiveRepository.findPageByCarrierIdAndDeliveredAt(requestDto.carrierId, null, requestDto.pageable)
-                .collectList()
-                .zipWith(this.orderTrackingReactiveRepository.count())
-                .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
-        else
-            orderTrackingReactiveRepository.findPageByCarrierId(requestDto.carrierId, requestDto.pageable)
-                .collectList()
-                .zipWith(this.orderTrackingReactiveRepository.count())
-                .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
+        orderTrackingReactiveRepository.findPageByCarrierId(requestDto.carrierId, requestDto.pageable, requestDto.filterActive)
+            .collectList()
+            .zipWith(this.orderTrackingReactiveRepository.countByCarrierId(requestDto.carrierId, requestDto.filterActive))
+            .map { PageImpl(it.t1, requestDto.pageable, it.t2) }
 
     @Transactional(readOnly = true)
     override fun getAllByCarrierId(carrierId: String, filterActive: Boolean): Flux<OrderTracking> =
-        if (filterActive)
-            orderTrackingReactiveRepository.findAllByCarrierIdAndDeliveredAt(carrierId, null)
-        else
-            orderTrackingReactiveRepository.findAllByCarrierId(carrierId)
+        orderTrackingReactiveRepository.findAllByCarrierId(carrierId, filterActive)
 
     @Transactional
     override fun setStatuses(requestDto: SetOrderTrackingStatusesDto): Flux<OrderTracking> =
