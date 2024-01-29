@@ -20,14 +20,6 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
     @Query(SqlQueries.FIND_LAST_BY_ORDER_ID_SQL_QUERY)
     fun findLastByOrderId(orderId: String): Mono<OrderTracking>
 
-    fun findPageByCarrierId(carrierId: String, pageable: Pageable): Flux<OrderTracking>
-
-    fun findAllByCarrierId(carrierId: String): Flux<OrderTracking>
-
-    // A tricky workaround to filter active order trackings with deliveredAt without custom impl
-    fun findPageByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?, pageable: Pageable): Flux<OrderTracking>
-    fun findAllByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?): Flux<OrderTracking>
-
     /**
      * Find by external id
      */
