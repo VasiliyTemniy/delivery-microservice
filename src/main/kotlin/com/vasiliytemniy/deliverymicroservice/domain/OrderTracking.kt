@@ -144,3 +144,30 @@ fun OrderTracking.Companion.of(request: CreateOrderTrackingDto): OrderTracking {
         updatedAt = LocalDateTime.now()
     )
 }
+
+
+/**
+ * Transform DB row to OrderTracking
+ *
+ * Asserts that row contains all required fields
+ */
+fun OrderTracking.Companion.of(row: Map<String, Any>): OrderTracking {
+    return OrderTracking(
+        id = row["id"] as UUID,
+        orderId = row["order_id"] as String,
+        pointNumber = row["point_number"] as Int,
+        fromFacilityId = row["from_facility_id"] as String,
+        destinationId = row["destination_id"] as String,
+        destinationType = row["destination_type"] as String,
+        carrierId = row["carrier_id"] as String,
+        status = row["status"] as String,
+        deliveryCost = row["delivery_cost"] as Int,
+        currency = row["currency"] as String,
+        currencyDecimalMultiplier = row["currency_decimal_multiplier"] as Int,
+        massControlValue = row["mass_control_value"] as Int?,
+        massMeasure = row["mass_measure"] as String?,
+        deliveredAt = row["delivered_at"] as LocalDateTime?,
+        createdAt = row["created_at"] as LocalDateTime?,
+        updatedAt = row["updated_at"] as LocalDateTime?
+    )
+}
