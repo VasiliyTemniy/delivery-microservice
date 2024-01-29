@@ -40,6 +40,15 @@ class SqlQueries {
             RETURNING *
         """
 
+        const val SET_POINT_NUMBER_SQL_QUERY = """
+            UPDATE delivery.order_trackings
+            SET
+                point_number = :toPointNumber
+            WHERE
+                order_id = :orderId AND point_number = :fromPointNumber
+            RETURNING *
+        """
+
         const val DELETE_ALL_ORDER_TRACKINGS_BY_ORDER_ID_SQL_QUERY = """
             DELETE FROM delivery.order_trackings
             WHERE
