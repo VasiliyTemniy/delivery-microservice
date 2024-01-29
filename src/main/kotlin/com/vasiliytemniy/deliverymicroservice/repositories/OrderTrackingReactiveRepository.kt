@@ -28,6 +28,11 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
     fun findPageByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?, pageable: Pageable): Flux<OrderTracking>
     fun findAllByCarrierIdAndDeliveredAt(carrierId: String, deliveredAt: LocalDateTime?): Flux<OrderTracking>
 
+    /**
+     * Find by external id
+     */
+    fun findByOrderIdAndPointNumber(orderId: String, pointNumber: Int): Mono<OrderTracking>
+
     @Query(SqlQueries.UPDATE_ORDER_TRACKING_SQL_QUERY)
     fun update(
         orderId: String,

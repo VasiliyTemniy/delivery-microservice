@@ -16,6 +16,11 @@ interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracki
     @Query(SqlQueries.FIND_LAST_BY_ORDER_ID_SQL_QUERY)
     suspend fun findLastByOrderId(orderId: String): OrderTracking?
 
+    /**
+     * Find by external id
+     */
+    suspend fun findByOrderIdAndPointNumber(orderId: String, pointNumber: Int): OrderTracking?
+
     @Query(SqlQueries.SET_ORDER_TRACKING_STATUS_SQL_QUERY)
     suspend fun setStatus(
         orderId: String,
