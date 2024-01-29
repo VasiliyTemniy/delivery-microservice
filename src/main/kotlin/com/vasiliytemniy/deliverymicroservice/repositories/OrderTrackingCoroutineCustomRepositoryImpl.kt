@@ -57,8 +57,13 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
     ): Page<OrderTracking> =
         withContext(Dispatchers.IO) {
 
+            val countQuery = if (filterActive)
+                SqlQueries.SELECT_COUNT_ACTIVE_BY_CARRIER_ID_SQL_QUERY
+            else
+                SqlQueries.SELECT_COUNT_BY_CARRIER_ID_SQL_QUERY
+
             val totalCount = async {
-                databaseClient.sql(SqlQueries.SELECT_COUNT_BY_CARRIER_ID_SQL_QUERY)
+                databaseClient.sql(countQuery)
                     .bind("carrierId", carrierId)
                     .fetch()
                     .one()

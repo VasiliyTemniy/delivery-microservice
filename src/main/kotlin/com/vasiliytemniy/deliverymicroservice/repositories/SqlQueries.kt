@@ -78,6 +78,12 @@ class SqlQueries {
             WHERE
                 carrier_id = :carrierId
         """
+
+        const val SELECT_COUNT_ACTIVE_BY_CARRIER_ID_SQL_QUERY = """
+            SELECT count(id) AS total FROM delivery.order_trackings
+            WHERE
+                carrier_id = :carrierId AND delivered_at IS NULL
+        """
     }
 
 }
