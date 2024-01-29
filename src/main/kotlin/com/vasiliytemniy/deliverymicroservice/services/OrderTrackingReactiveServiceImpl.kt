@@ -99,6 +99,20 @@ class OrderTrackingReactiveServiceImpl(
 
     @Transactional
     override fun deleteByExternalId(orderId: String, pointNumber: Int): Mono<OrderTracking> =
-        // TODO!: Reorder after deleting
         orderTrackingReactiveRepository.deleteByExternalId(orderId, pointNumber)
+            .flatMap {
+                var followingPointNumber = pointNumber + 1
+
+                // Shift all following order tracking's point numbers by one
+                do {
+                    val shiftedOrderTracking =
+                        orderTrackingReactiveRepository.setPointNumber(
+                            orderId, followingPointNumber, followingPointNumber - 1
+                        )
+                    followingPointNumber++
+                } while (shiftedOrderTracking != null)
+
+                Mono.just(it)
+            }
+
 }
