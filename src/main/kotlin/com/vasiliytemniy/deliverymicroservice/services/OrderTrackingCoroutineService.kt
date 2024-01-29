@@ -32,6 +32,8 @@ interface OrderTrackingCoroutineService {
 
     suspend fun deleteByExternalId(orderId: String, pointNumber: Int): OrderTracking?
 
+    suspend fun deleteAll(): Unit
+
     suspend fun populateGeneratedTestData(
         ordersCount: Int = 10,
         pointsCount: Int = 10,

@@ -225,6 +225,21 @@ class OrderTrackingCoroutineController(
                 .also { log.info("deleted order tracking: $orderId, $pointNumber") }
         }
 
+    @DeleteMapping(path = ["/all"])
+    @Operation(
+        method = "deleteAll",
+        summary = "Delete all order trackings",
+        operationId = "deleteAll",
+        description = "Delete all order trackings"
+    )
+    suspend fun deleteAll(): ResponseEntity<Nothing> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.GONE)
+                .body(null)
+                .also { log.info("deleted all order trackings") }
+        }
+
     @GetMapping(path = ["/populate-test-data"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "populateTestData",

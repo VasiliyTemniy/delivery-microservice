@@ -170,6 +170,12 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional
+    override suspend fun deleteAll(): Unit =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.deleteAll()
+        }
+
+    @Transactional
     override suspend fun populateGeneratedTestData(
         ordersCount: Int,
         pointsCount: Int,
