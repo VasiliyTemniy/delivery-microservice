@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 
 
 @Repository
-interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking, String> {
+interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking, String>, OrderTrackingReactiveCustomRepository {
 
     fun findPageByOrderId(orderId: String, pageable: Pageable): Flux<OrderTracking>
 
