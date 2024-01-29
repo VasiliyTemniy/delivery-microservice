@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.services
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.dto.*
+import com.vasiliytemniy.deliverymicroservice.exceptions.OrderTrackingNotFoundException
 import com.vasiliytemniy.deliverymicroservice.repositories.OrderTrackingCoroutineRepository
 import jakarta.validation.Valid
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +64,58 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional
-    override suspend fun reorder(requestDto: ReorderOrderTrackingsDto): List<OrderTracking> {
-        TODO("Not yet implemented")
+    override suspend fun reorder(requestDto: ReorderOrderTrackingsDto, performRequestCheck: Boolean): List<OrderTracking> =
+        withContext(Dispatchers.IO) {
+
+            // Perform optional check of requestDto fromPointNumberToPointNumber Map
+            if (performRequestCheck)
+                if (!checkReorderRequestDto(requestDto))
+                    throw IllegalArgumentException("Duplicate or invalid point numbers")
+
+            val deletedOrderTrackings = mutableListOf<OrderTracking>()
+
+            // Delete all order trackings with specified as "from" point numbers
+            requestDto.fromPointNumberToPointNumber.forEach {
+                val deletedOrderTracking = orderTrackingCoroutineRepository
+                    .deleteByExternalId(requestDto.orderId, it.key)?: throw OrderTrackingNotFoundException(
+                        "Order tracking with order id ${requestDto.orderId} and point number ${it.key} not found",
+                        "orderId"
+                    )
+
+                deletedOrderTrackings.add(deletedOrderTracking)
+            }
+
+            // Save all order trackings with specified as "to" point numbers, return result
+            deletedOrderTrackings.map {
+                orderTrackingCoroutineRepository.save(
+                    it.copy(
+                        pointNumber = requestDto.fromPointNumberToPointNumber[it.pointNumber]
+                    )
+                )
+            }
+    }
+
+    private fun checkReorderRequestDto(requestDto: ReorderOrderTrackingsDto): Boolean {
+        val uniqueFromPointNumbers = mutableSetOf<Int>()
+        val uniqueToPointNumbers = mutableSetOf<Int>()
+
+        requestDto.fromPointNumberToPointNumber.forEach {
+            val fromAdded = uniqueToPointNumbers.add(it.value)
+            if (!fromAdded) {
+                return false
+            }
+            val toAdded = uniqueFromPointNumbers.add(it.key)
+            if (!toAdded) {
+                return false
+            }
+        }
+
+        uniqueToPointNumbers.forEach {
+            if (!uniqueFromPointNumbers.contains(it)) {
+                return false
+            }
+        }
+        return true
     }
 
     @Transactional
@@ -95,9 +146,22 @@ class OrderTrackingCoroutineServiceImpl(
         }
 
     @Transactional
-    override suspend fun deleteByExternalId(orderId: String, pointNumber: Int) =
+    override suspend fun deleteByExternalId(orderId: String, pointNumber: Int): OrderTracking? =
         withContext(Dispatchers.IO) {
-            // TODO!: Reorder after deleting
-            orderTrackingCoroutineRepository.deleteByExternalId(orderId, pointNumber)
+            val deletedOrderTracking = orderTrackingCoroutineRepository.deleteByExternalId(orderId, pointNumber)
+                ?: return@withContext null
+
+            var followingPointNumber = pointNumber + 1
+
+            // Shift all following order tracking's point numbers by one
+            do {
+                val shiftedOrderTracking =
+                    orderTrackingCoroutineRepository.setPointNumber(
+                        orderId, followingPointNumber, followingPointNumber - 1
+                    )
+                followingPointNumber++
+            } while (shiftedOrderTracking != null)
+
+            deletedOrderTracking
         }
 }
