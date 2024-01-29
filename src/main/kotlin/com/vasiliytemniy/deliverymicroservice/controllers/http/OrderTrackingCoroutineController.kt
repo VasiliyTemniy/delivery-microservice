@@ -225,6 +225,27 @@ class OrderTrackingCoroutineController(
                 .also { log.info("deleted order tracking: $orderId, $pointNumber") }
         }
 
+    @GetMapping(path = ["/populate-test-data"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "populateTestData",
+        summary = "Populate test data",
+        operationId = "populateTestData",
+        description = "Populate test data with generated order trackings"
+    )
+    suspend fun populateTestData(
+        @RequestParam(name = "orders-count", defaultValue = "10") ordersCount: Int,
+        @RequestParam(name = "points-count", defaultValue = "10") pointsCount: Int,
+        @RequestParam(name = "add-mass-control-errors-count", defaultValue = "0") addMassControlErrorsCount: Int
+    ): ResponseEntity<List<SuccessOrderTrackingResponse>> =
+        withTimeout(TIMEOUT_MILLIS * 5) {
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.populateGeneratedTestData(
+                    ordersCount, pointsCount, addMassControlErrorsCount
+                ).map { it.toSuccessHttpResponse() })
+                .also { log.info("populated test data: $ordersCount, $pointsCount, $addMassControlErrorsCount") }
+        }
+
     companion object {
         private val log = LoggerFactory.getLogger(OrderTrackingReactiveController::class.java)
         private const val TIMEOUT_MILLIS = 5000L
