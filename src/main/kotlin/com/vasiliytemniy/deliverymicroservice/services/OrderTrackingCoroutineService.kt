@@ -24,7 +24,7 @@ interface OrderTrackingCoroutineService {
 
     suspend fun setStatuses(requestDto: SetOrderTrackingStatusesDto): List<OrderTracking>
 
-    suspend fun reorder(requestDto: ReorderOrderTrackingsDto): List<OrderTracking>
+    suspend fun reorder(requestDto: ReorderOrderTrackingsDto, performRequestCheck: Boolean = true): List<OrderTracking>
 
     suspend fun update(requestDto: UpdateOrderTrackingDto): OrderTracking?
 
