@@ -71,7 +71,7 @@ fun OrderTracking.toProto(): OrderTrackingDataGrpc {
         .setCurrency(this.currency)
         .setCurrencyDecimalMultiplier(this.currencyDecimalMultiplier)
         .setMassControlValue(this.massControlValue?:0)
-        .setMassMeasure(this.massMeasure)
+        .setMassMeasure(this.massMeasure?:"null")
         .setEstimatedDeliveryAt(this.estimatedDeliveryAt.toString())
         .setDeliveredAt(this.deliveredAt.toString())
         .setCreatedAt(this.createdAt.toString())
