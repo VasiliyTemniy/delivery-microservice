@@ -18,4 +18,6 @@ interface OrderTrackingCoroutineCustomRepository {
 
     fun findAllByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking>
 
+    suspend fun setPointNumber(orderId: String, fromPointNumber: Int, toPointNumber: Int): OrderTracking
+
 }

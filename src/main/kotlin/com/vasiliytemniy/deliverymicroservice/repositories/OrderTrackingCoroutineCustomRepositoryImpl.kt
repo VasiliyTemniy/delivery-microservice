@@ -2,8 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.ORDER_ID
-import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.SELECT_COUNT_BY_CARRIER_ID_SQL_QUERY
-import com.vasiliytemniy.deliverymicroservice.repositories.SqlQueries.Companion.SELECT_COUNT_BY_ORDER_ID_SQL_QUERY
+import com.vasiliytemniy.deliverymicroservice.domain.of
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +20,6 @@ import org.springframework.data.relational.core.query.Query
 import org.springframework.data.relational.core.query.isEqual
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 
 
 @Repository
@@ -93,6 +91,18 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
                 Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull()),
                 OrderTracking::class.java
             ).asFlow()
+        }
+
+    override suspend fun setPointNumber(orderId: String, fromPointNumber: Int, toPointNumber: Int): OrderTracking =
+        withContext(Dispatchers.IO) {
+            databaseClient.sql(SqlQueries.SET_POINT_NUMBER_SQL_QUERY)
+                .bind("orderId", orderId)
+                .bind("fromPointNumber", fromPointNumber)
+                .bind("toPointNumber", toPointNumber)
+                .fetch()
+                .first()
+                .map { OrderTracking.of(it) }
+                .awaitFirst()
         }
 
     companion object {
