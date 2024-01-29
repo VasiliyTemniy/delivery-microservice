@@ -101,7 +101,7 @@ class OrderTrackingReactiveServiceImpl(
                             orderId, followingPointNumber, followingPointNumber - 1
                         )
                     followingPointNumber++
-                } while (shiftedOrderTracking != null)
+                } while (shiftedOrderTracking.block() != null)
 
                 Mono.just(it)
             }
