@@ -43,6 +43,8 @@ interface OrderTrackingCoroutineRepository : CoroutineCrudRepository<OrderTracki
         currencyDecimalMultiplier: Int,
         massControlValue: Int?,
         massMeasure: String?,
+        lat: Double?,
+        lon: Double?,
         estimatedDeliveryAt: LocalDateTime?,
         deliveredAt: LocalDateTime?
     ): OrderTracking?
