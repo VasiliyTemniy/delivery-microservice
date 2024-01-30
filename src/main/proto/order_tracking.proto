@@ -10,6 +10,7 @@ service OrderTrackingService {
   rpc getLastByOrderId (GetLastByOrderIdRequest) returns (OrderTrackingResponse);
   rpc getStreamByCarrierId (GetStreamByCarrierIdRequest) returns (stream OrderTrackingResponse);
   rpc getPageByCarrierId (GetPageByCarrierIdRequest) returns (PageOrderTrackingsResponse);
+  rpc getPageByFilters (GetPageByFiltersRequest) returns (PageOrderTrackingsResponse);
   rpc update (UpdateRequest) returns (OrderTrackingResponse);
   rpc setStatuses (SetStatusesRequest) returns (ManyOrderTrackingsResponse);
   rpc reorder (ReorderRequest) returns (ManyOrderTrackingsResponse);
@@ -40,6 +41,17 @@ message OrderTrackingData {
 message OrderTrackingExternalId {
   string orderId = 1;
   int32 pointNumber = 2;
+}
+
+message OrderTrackingIdFilterGroup {
+  string type = 1;
+  string id = 2;
+}
+
+message OrderTrackingTimeFilterGroup {
+  string type = 1;
+  optional string from = 2;
+  optional string to = 3;
 }
 
 // Requests
@@ -86,6 +98,16 @@ message GetPageByCarrierIdRequest {
   int32 page = 2;
   int32 size = 3;
   bool filterActive = 4;
+}
+
+message GetPageByFiltersRequest {
+  repeated OrderTrackingIdFilterGroup idFilterGroups = 1;
+  repeated OrderTrackingTimeFilterGroup timeFilterGroups = 2;
+  repeated string eitherEqualStatusFilters = 3;
+  repeated string neitherEqualStatusFilters = 4;
+  bool hasMassMeasureFilter = 5;
+  int32 page = 6;
+  int32 size = 7;
 }
 
 message UpdateRequest {
