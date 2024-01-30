@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS delivery.order_trackings
     currency_decimal_multiplier INTEGER         NOT NULL,
     mass_control_value          INTEGER,
     mass_measure                VARCHAR(60),
+    lat                         DOUBLE PRECISION,
+    lon                         DOUBLE PRECISION,
     estimated_delivery_at       TIMESTAMP WITH TIME ZONE,
     delivered_at                TIMESTAMP WITH TIME ZONE,
 

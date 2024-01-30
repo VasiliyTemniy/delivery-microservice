@@ -30,12 +30,14 @@ message OrderTrackingData {
   int32 deliveryCost = 9;
   string currency = 10;
   int32 currencyDecimalMultiplier = 11;
-  int32 massControlValue = 12;
-  string massMeasure = 13;
-  string estimatedDeliveryAt = 14;
-  string deliveredAt = 15;
-  string createdAt = 16;
-  string updatedAt = 17;
+  optional int32 massControlValue = 12;
+  optional string massMeasure = 13;
+  optional double lat = 14;
+  optional double lon = 15;
+  optional string estimatedDeliveryAt = 16;
+  optional string deliveredAt = 17;
+  optional string createdAt = 18;
+  optional string updatedAt = 19;
 }
 
 message OrderTrackingExternalId {
@@ -66,11 +68,13 @@ message CreateRequest {
   int32 deliveryCost = 7;
   string currency = 8;
   int32 currencyDecimalMultiplier = 9;
-  int32 massControlValue = 10;
-  string massMeasure = 11;
-  string estimatedDeliveryAt = 12;
-  string deliveredAt = 13;
-  optional int32 pointNumber = 14;
+  optional int32 massControlValue = 10;
+  optional string massMeasure = 11;
+  optional double lat = 12;
+  optional double lon = 13;
+  optional string estimatedDeliveryAt = 14;
+  optional string deliveredAt = 15;
+  optional int32 pointNumber = 16;
 }
 
 message GetStreamByOrderIdRequest {
@@ -121,10 +125,12 @@ message UpdateRequest {
   int32 deliveryCost = 8;
   string currency = 9;
   int32 currencyDecimalMultiplier = 10;
-  int32 massControlValue = 11;
-  string massMeasure = 12;
-  string estimatedDeliveryAt = 13;
-  string deliveredAt = 14;
+  optional int32 massControlValue = 11;
+  optional string massMeasure = 12;
+  optional double lat = 13;
+  optional double lon = 14;
+  optional string estimatedDeliveryAt = 15;
+  optional string deliveredAt = 16;
 }
 
 message SetStatusesRequest {
