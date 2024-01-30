@@ -1,8 +1,12 @@
 package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
+import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.MASS_MEASURE
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.ORDER_ID
 import com.vasiliytemniy.deliverymicroservice.domain.of
+import com.vasiliytemniy.deliverymicroservice.dto.IdFilterGroup
+import com.vasiliytemniy.deliverymicroservice.dto.TimeFilterGroup
+import com.vasiliytemniy.deliverymicroservice.utils.buildOrderTrackingCustomFilterQuery
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
@@ -74,6 +78,43 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
                 Query.query(Criteria.where("carrier_id").isEqual(carrierId))
             else
                 Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull())
+
+            val orderTrackingList = async {
+                template.select(query.with(pageable), OrderTracking::class.java)
+                    .asFlow()
+                    .toList()
+            }
+
+            PageImpl(orderTrackingList.await(), pageable, totalCount.await()["total"] as Long)
+                .also { log.debug("pagination: {}", it) }
+        }
+
+    override suspend fun findPageByFilters(
+        idFilters: List<IdFilterGroup>,
+        timeFilters: List<TimeFilterGroup>,
+        eitherEqualStatusFilters: List<String>,
+        neitherEqualStatusFilters: List<String>,
+        hasMassMeasureFilter: Boolean,
+        pageable: Pageable
+    ): Page<OrderTracking> =
+        withContext(Dispatchers.IO) {
+
+            val (countQuery, query) =
+                buildOrderTrackingCustomFilterQuery(
+                    idFilters,
+                    timeFilters,
+                    eitherEqualStatusFilters,
+                    neitherEqualStatusFilters,
+                    hasMassMeasureFilter
+                )
+
+            val totalCount = async {
+                databaseClient.sql(countQuery)
+                    // .bind() // do not have to bind here - it is binded when building query
+                    .fetch()
+                    .one()
+                    .awaitFirst()
+            }
 
             val orderTrackingList = async {
                 template.select(query.with(pageable), OrderTracking::class.java)
