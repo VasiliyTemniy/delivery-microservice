@@ -51,8 +51,8 @@ fun generateOrderTracking(
         currencyDecimalMultiplier = overrideCurrencyMultiplier?:10.toFloat().pow(faker.number().numberBetween(1, 3)).toInt(),
         massControlValue = overrideMassControlValue?: if (hasMassControl) faker.number().numberBetween(1, 1000) else null,
         massMeasure = overrideMassMeasure?: if (hasMassControl) faker.options().option( "kg", "g", "t") else null,
-        lat = if (hasGeoCoordinates) overrideLat?:faker.number().numberBetween(1, 1000).toDouble() else null,
-        lon = if (hasGeoCoordinates) overrideLon?:faker.number().numberBetween(1, 1000).toDouble() else null,
+        lat = if (hasGeoCoordinates) overrideLat?:faker.number().numberBetween(-89, 89).toDouble() else null,
+        lon = if (hasGeoCoordinates) overrideLon?:faker.number().numberBetween(-179, 179).toDouble() else null,
         estimatedDeliveryAt = if (isDelivered)
             faker.date().past(3, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
         else
