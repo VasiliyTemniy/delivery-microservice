@@ -20,13 +20,13 @@ data class SetOrderTrackingStatusesDto(
 }
 
 
-fun SetOrderTrackingStatusesDto.Companion.of(request: OrderTracking.SetStatusesRequest): SetOrderTrackingStatusesDto {
-
-    val orderTrackingExternalIds = request.orderTrackingExternalIdsList.toList()
-        .map { OrderTrackingExternalIdDto.of(it) }
-
-    return SetOrderTrackingStatusesDto(orderTrackingExternalIds, request.status, request.deliveredAt)
-}
+fun SetOrderTrackingStatusesDto.Companion.of(request: OrderTracking.SetStatusesRequest): SetOrderTrackingStatusesDto =
+    SetOrderTrackingStatusesDto(
+        request.orderTrackingExternalIdsList.toList()
+            .map { OrderTrackingExternalIdDto.of(it) },
+        request.status,
+        request.deliveredAt
+    )
 
 
 fun SetOrderTrackingStatusesDto.Companion.of(request: Any): SetOrderTrackingStatusesDto {
