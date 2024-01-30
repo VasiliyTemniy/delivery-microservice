@@ -1,6 +1,7 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
 import com.vasiliytemniy.deliverymicroservice.domain.IdFilterType
+import com.vasiliytemniy.deliverymicroservice.domain.NullablesFilterType
 import com.vasiliytemniy.deliverymicroservice.domain.TimeFilterType
 import com.vasiliytemniy.deliverymicroservice.utils.parseOptionalDate
 import com.vasiliytemniy.grpc.ordertracking.service.OrderTracking
@@ -13,6 +14,7 @@ data class GetOrderTrackingsByFiltersDto(
     val timeFilters: List<TimeFilterGroup>,
     val eitherEqualStatusFilters: List<String>,
     val neitherEqualStatusFilters: List<String>,
+    val nullablesFilters: List<NullablesFilterGroup>,
     val hasMassMeasureFilter: Boolean = false,
     val pageable: Pageable
 ) {
@@ -30,6 +32,10 @@ data class TimeFilterGroup(
     val to: LocalDateTime?
 )
 
+data class NullablesFilterGroup(
+    val type: NullablesFilterType,
+    val isOrNotNull: Boolean
+)
 
 fun GetOrderTrackingsByFiltersDto.Companion.of(request: OrderTracking.GetPageByFiltersRequest): GetOrderTrackingsByFiltersDto =
     GetOrderTrackingsByFiltersDto(
@@ -39,6 +45,8 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: OrderTracking.GetPageByF
             .map { TimeFilterGroup(TimeFilterType.valueOf(it.type), parseOptionalDate(it.from), parseOptionalDate(it.to)) },
         request.eitherEqualStatusFiltersList.toList(),
         request.neitherEqualStatusFiltersList.toList(),
+        request.nullablesFilterGroupsList.toList()
+            .map { NullablesFilterGroup(NullablesFilterType.valueOf(it.type), it.isOrNotNull) },
         request.hasMassMeasureFilter,
         PageRequest.of(request.page, request.size)
     )

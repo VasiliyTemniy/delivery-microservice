@@ -56,6 +56,11 @@ message OrderTrackingTimeFilterGroup {
   optional string to = 3;
 }
 
+message OrderTrackingNullablesFilterGroup {
+  string type = 1;
+  bool isOrNotNull = 2;
+}
+
 // Requests
 
 message CreateRequest {
@@ -109,9 +114,10 @@ message GetPageByFiltersRequest {
   repeated OrderTrackingTimeFilterGroup timeFilterGroups = 2;
   repeated string eitherEqualStatusFilters = 3;
   repeated string neitherEqualStatusFilters = 4;
-  bool hasMassMeasureFilter = 5;
-  int32 page = 6;
-  int32 size = 7;
+  repeated OrderTrackingNullablesFilterGroup nullablesFilterGroups = 5;
+  bool hasMassMeasureFilter = 6;
+  int32 page = 7;
+  int32 size = 8;
 }
 
 message UpdateRequest {

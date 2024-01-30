@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.utils
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.dto.IdFilterGroup
+import com.vasiliytemniy.deliverymicroservice.dto.NullablesFilterGroup
 import com.vasiliytemniy.deliverymicroservice.dto.TimeFilterGroup
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.data.relational.core.query.Query
@@ -12,6 +13,7 @@ fun buildOrderTrackingCustomFilterQuery(
     timeFilters: List<TimeFilterGroup>,
     eitherEqualStatusFilters: List<String>,
     neitherEqualStatusFilters: List<String>,
+    nullablesFilters: List<NullablesFilterGroup>,
     hasMassMeasureFilter: Boolean,
 ): Pair<String, Query> {
 
@@ -84,6 +86,17 @@ fun buildOrderTrackingCustomFilterQuery(
         if (isFirstFilter) {
             countQueryPrefix = "AND"
             isFirstFilter = false
+        }
+    }
+
+    // Apply nullables filters
+    for (it in nullablesFilters) {
+        if (it.isOrNotNull) {
+            countQuery += "$countQueryPrefix ${it.type} IS NULL "
+            query.apply { Criteria.where(it.type.toString()).isNull() }
+        } else {
+            countQuery += "$countQueryPrefix ${it.type} IS NOT NULL "
+            query.apply { Criteria.where(it.type.toString()).isNotNull() }
         }
     }
 

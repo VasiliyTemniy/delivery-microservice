@@ -2,6 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.dto.IdFilterGroup
+import com.vasiliytemniy.deliverymicroservice.dto.NullablesFilterGroup
 import com.vasiliytemniy.deliverymicroservice.dto.TimeFilterGroup
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.domain.Page
@@ -21,6 +22,7 @@ interface OrderTrackingCoroutineCustomRepository {
         timeFilters: List<TimeFilterGroup>,
         eitherEqualStatusFilters: List<String>,
         neitherEqualStatusFilters: List<String>,
+        nullablesFilters: List<NullablesFilterGroup>,
         hasMassMeasureFilter: Boolean,
         pageable: Pageable
     ): Page<OrderTracking>

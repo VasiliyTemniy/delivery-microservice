@@ -1,10 +1,11 @@
 package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
-import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.MASS_MEASURE
+import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.CARRIER_ID
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.ORDER_ID
 import com.vasiliytemniy.deliverymicroservice.domain.of
 import com.vasiliytemniy.deliverymicroservice.dto.IdFilterGroup
+import com.vasiliytemniy.deliverymicroservice.dto.NullablesFilterGroup
 import com.vasiliytemniy.deliverymicroservice.dto.TimeFilterGroup
 import com.vasiliytemniy.deliverymicroservice.utils.buildOrderTrackingCustomFilterQuery
 import kotlinx.coroutines.Dispatchers
@@ -75,9 +76,9 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
             }
 
             val query = if (filterActive)
-                Query.query(Criteria.where("carrier_id").isEqual(carrierId))
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId))
             else
-                Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull())
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and("delivered_at").isNull())
 
             val orderTrackingList = async {
                 template.select(query.with(pageable), OrderTracking::class.java)
@@ -94,6 +95,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
         timeFilters: List<TimeFilterGroup>,
         eitherEqualStatusFilters: List<String>,
         neitherEqualStatusFilters: List<String>,
+        nullablesFilters: List<NullablesFilterGroup>,
         hasMassMeasureFilter: Boolean,
         pageable: Pageable
     ): Page<OrderTracking> =
@@ -105,12 +107,13 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
                     timeFilters,
                     eitherEqualStatusFilters,
                     neitherEqualStatusFilters,
+                    nullablesFilters,
                     hasMassMeasureFilter
                 )
 
             val totalCount = async {
                 databaseClient.sql(countQuery)
-                    // .bind() // do not have to bind here - it is binded when building query
+                    // .bind() // do not have to bind here - it is binded in buildOrderTrackingCustomFilterQuery
                     .fetch()
                     .one()
                     .awaitFirst()
@@ -129,12 +132,12 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
     override fun findAllByCarrierId(carrierId: String, filterActive: Boolean): Flow<OrderTracking> =
         if (filterActive) {
             template.select(
-                Query.query(Criteria.where("carrier_id").isEqual(carrierId)),
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId)),
                 OrderTracking::class.java
             ).asFlow()
         } else {
             template.select(
-                Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull()),
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and("delivered_at").isNull()),
                 OrderTracking::class.java
             ).asFlow()
         }
