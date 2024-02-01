@@ -22,10 +22,7 @@ fun generateOrderTracking(
     overrideFromFacilityId: String? = null,
     overrideDestinationId: String? = null,
     overrideCurrency: String? = null,
-    overrideCurrencyMultiplier: Int? = null,
-    overrideHasGeoCoordinates: Boolean? = null,
-    overrideLat: Double? = null,
-    overrideLon: Double? = null
+    overrideCurrencyMultiplier: Int? = null
 ): OrderTracking {
     val isDelivered = overrideIsDelivered?:faker.options().option(true, false)
 
@@ -34,8 +31,6 @@ fun generateOrderTracking(
     val createdAtDate = faker.date().past(6, 3, TimeUnit.DAYS)
     val createdAt = createdAtDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
     val updatedAt = faker.date().future(3, TimeUnit.DAYS, createdAtDate).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-
-    val hasGeoCoordinates = overrideHasGeoCoordinates?: faker.options().option(true, false)
 
     return OrderTracking(
         id = null,
@@ -51,8 +46,6 @@ fun generateOrderTracking(
         currencyDecimalMultiplier = overrideCurrencyMultiplier?:10.toFloat().pow(faker.number().numberBetween(1, 3)).toInt(),
         massControlValue = overrideMassControlValue?: if (hasMassControl) faker.number().numberBetween(1, 1000) else null,
         massMeasure = overrideMassMeasure?: if (hasMassControl) faker.options().option( "kg", "g", "t") else null,
-        lat = if (hasGeoCoordinates) overrideLat?:faker.number().numberBetween(1, 1000).toDouble() else null,
-        lon = if (hasGeoCoordinates) overrideLon?:faker.number().numberBetween(1, 1000).toDouble() else null,
         estimatedDeliveryAt = if (isDelivered)
             faker.date().past(3, TimeUnit.DAYS).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
         else
