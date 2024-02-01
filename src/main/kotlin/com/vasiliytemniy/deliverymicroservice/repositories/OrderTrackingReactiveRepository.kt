@@ -39,8 +39,6 @@ interface OrderTrackingReactiveRepository : ReactiveCrudRepository<OrderTracking
         currencyDecimalMultiplier: Int,
         massControlValue: Int?,
         massMeasure: String?,
-        lat: Double?,
-        lon: Double?,
         estimatedDeliveryAt: LocalDateTime?,
         deliveredAt: LocalDateTime?
     ): Mono<OrderTracking>

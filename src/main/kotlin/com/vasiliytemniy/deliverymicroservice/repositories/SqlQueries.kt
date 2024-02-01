@@ -23,8 +23,6 @@ class SqlQueries {
                 currency_decimal_multiplier = :currencyDecimalMultiplier,
                 mass_control_value = :massControlValue,
                 mass_measure = :massMeasure,
-                lat = :lat,
-                lon = :lon,
                 estimated_delivery_at = :estimatedDeliveryAt,
                 delivered_at = :deliveredAt
             WHERE

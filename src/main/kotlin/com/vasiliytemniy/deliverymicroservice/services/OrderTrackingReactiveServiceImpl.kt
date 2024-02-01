@@ -90,8 +90,6 @@ class OrderTrackingReactiveServiceImpl(
             requestDto.currencyDecimalMultiplier,
             requestDto.massControlValue,
             requestDto.massMeasure,
-            requestDto.lat,
-            requestDto.lon,
             requestDto.parsedEstimatedDeliveryAt,
             requestDto.parsedDeliveredAt
         )
