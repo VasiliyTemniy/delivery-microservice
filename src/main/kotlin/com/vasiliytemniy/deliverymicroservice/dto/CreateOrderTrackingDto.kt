@@ -14,8 +14,6 @@ data class CreateOrderTrackingDto (
     val currencyDecimalMultiplier: Int,
     val massControlValue: Int?,
     val massMeasure: String?,
-    val lat: Double?,
-    val lon: Double?,
     val estimatedDeliveryAt: String?,
     val deliveredAt: String?
 )
