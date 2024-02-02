@@ -7,6 +7,11 @@ service DeliveryMetaService {
   rpc calculateDeliveryMeta (CalculateDeliveryMetaRequest) returns (CalculateDeliveryMetaResponse);
 }
 
+message DeliveryMetaData {
+  optional int32 cost = 1;
+  optional string expectedDeliveryAt = 2;
+}
+
 // Currency is not needed here - cost calculation is abstract for given costs
 message DeliveryCostParams {
   repeated string calculationType = 1; // "fixed", "distance", "mass", "volume"
@@ -48,6 +53,5 @@ message CalculateDeliveryMetaRequest {
 
 message CalculateDeliveryMetaResponse {
   string error = 1; // go-style error as value
-  optional int32 cost = 2;
-  optional string expectedDeliveryAt = 3;
+  DeliveryMetaData deliveryMeta = 2;
 }
