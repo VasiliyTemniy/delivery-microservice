@@ -11,13 +11,13 @@ enum class IdFilterType(val value: String) {
     }
 
     companion object {
-        fun isIdFilterType(value: String): Boolean {
-            return when (value) {
-                "order_id" -> true
-                "carrier_id" -> true
-                "from_facility_id" -> true
-                "destination_id" -> true
-                else -> false
+        fun fromValue(value: String): IdFilterType {
+            return when (value.lowercase()) {
+                "order_id" -> ORDER_ID
+                "carrier_id" -> CARRIER_ID
+                "from_facility_id" -> FROM_FACILITY_ID
+                "destination_id" -> DESTINATION_ID
+                else -> throw IllegalArgumentException()
             }
         }
     }

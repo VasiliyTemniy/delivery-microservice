@@ -4,8 +4,6 @@ package com.vasiliytemniy.deliverymicroservice.domain
 enum class NullablesFilterType(val value: String) {
     MASS_CONTROL_VALUE("mass_control_value"),
     MASS_MEASURE("mass_measure"),
-    LAT("lat"),
-    LON("lon"),
     ESTIMATED_DELIVERY_AT("estimated_delivery_at"),
     DELIVERED_AT("delivered_at");
 
@@ -14,15 +12,13 @@ enum class NullablesFilterType(val value: String) {
     }
 
     companion object {
-        fun isNullablesFilterType(value: String): Boolean {
-            return when (value) {
-                "mass_control_value" -> true
-                "mass_measure" -> true
-                "lat" -> true
-                "lon" -> true
-                "estimated_delivery_at" -> true
-                "delivered_at" -> true
-                else -> false
+        fun fromValue(value: String): NullablesFilterType {
+            return when (value.lowercase()) {
+                "mass_control_value" -> MASS_CONTROL_VALUE
+                "mass_measure" -> MASS_MEASURE
+                "estimated_delivery_at" -> ESTIMATED_DELIVERY_AT
+                "delivered_at" -> DELIVERED_AT
+                else -> throw IllegalArgumentException()
             }
         }
     }

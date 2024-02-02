@@ -11,13 +11,13 @@ enum class TimeFilterType(val value: String) {
     }
 
     companion object {
-        fun isTimeFilterType(value: String): Boolean {
-            return when (value) {
-                "estimated_delivery_at" -> true
-                "delivered_at" -> true
-                "created_at" -> true
-                "updated_at" -> true
-                else -> false
+        fun fromValue(value: String): TimeFilterType {
+            return when (value.lowercase()) {
+                "estimated_delivery_at" -> ESTIMATED_DELIVERY_AT
+                "delivered_at" -> DELIVERED_AT
+                "created_at" -> CREATED_AT
+                "updated_at" -> UPDATED_AT
+                else -> throw IllegalArgumentException()
             }
         }
     }

@@ -61,7 +61,6 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
 
     if (
         request.keys.size > 6
-        || request.keys.size == 0
     )
         throw IllegalArgumentException("$invalidRequestPrefix invalid request body")
 
@@ -79,14 +78,19 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
                 || !it.keys.containsAll(listOf("type", "id"))
                 || it["type"] !is String
                 || it["id"] !is String
-                || !IdFilterType.isIdFilterType(it["type"] as String)
             )
                 throw IllegalArgumentException("$invalidRequestPrefix invalid idFilters")
 
-            parsedIdFilters.add(IdFilterGroup(
-                IdFilterType.valueOf(it["type"] as String),
-                it["id"] as String)
-            )
+            try {
+                parsedIdFilters.add(
+                    IdFilterGroup(
+                        IdFilterType.fromValue(it["type"] as String),
+                        it["id"] as String
+                    )
+                )
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException("$invalidRequestPrefix invalid idFilters")
+            }
         }
     }
 
@@ -105,15 +109,18 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
                 || it["type"] !is String
                 || !(it["from"] is String || it["from"] == null)
                 || !(it["to"] is String || it["to"] == null)
-                || !TimeFilterType.isTimeFilterType(it["type"] as String)
             )
                 throw IllegalArgumentException("$invalidRequestPrefix invalid timeFilters")
 
-            parsedTimeFilters.add(TimeFilterGroup(
-                TimeFilterType.valueOf(it["type"] as String),
-                parseOptionalDate(it["from"] as String?),
-                parseOptionalDate(it["to"] as String?))
-            )
+            try {
+                parsedTimeFilters.add(TimeFilterGroup(
+                    TimeFilterType.valueOf(it["type"] as String),
+                    parseOptionalDate(it["from"] as String?),
+                    parseOptionalDate(it["to"] as String?))
+                )
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException("$invalidRequestPrefix invalid timeFilters")
+            }
         }
     }
 
@@ -167,14 +174,17 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
                 || !it.keys.containsAll(listOf("type", "isOrNotNull"))
                 || it["type"] !is String
                 || it["isOrNotNull"] !is Boolean
-                || !NullablesFilterType.isNullablesFilterType(it["type"] as String)
             )
                 throw IllegalArgumentException("$invalidRequestPrefix invalid nullablesFilters")
 
-            parsedNullablesFilters.add(NullablesFilterGroup(
-                NullablesFilterType.valueOf(it["type"] as String),
-                it["isOrNotNull"] as Boolean)
-            )
+            try {
+                parsedNullablesFilters.add(NullablesFilterGroup(
+                    NullablesFilterType.valueOf(it["type"] as String),
+                    it["isOrNotNull"] as Boolean)
+                )
+            } catch (e: IllegalArgumentException) {
+                throw IllegalArgumentException("$invalidRequestPrefix invalid nullablesFilters")
+            }
         }
     }
 
