@@ -1,5 +1,6 @@
 package com.vasiliytemniy.deliverymicroservice.controllers.http
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.domain.of
 import com.vasiliytemniy.deliverymicroservice.domain.toSuccessHttpResponse
@@ -135,6 +136,10 @@ class OrderTrackingCoroutineController(
                 .also { log.info("response: $it") }
         }
 
+    /**
+     * Request filters are in JSON format, but put in RequestParams as "filters"
+     * to follow REST, HTTP 1.1 guidelines
+     */
     @GetMapping(path = ["/by-filters"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "getPageOrderTrackingsByFilters",
@@ -145,13 +150,19 @@ class OrderTrackingCoroutineController(
     suspend fun getPageOrderTrackingsByFilters(
         @RequestParam(name = "page", defaultValue = "0") page: Int,
         @RequestParam(name = "size", defaultValue = "10") size: Int,
-        @RequestBody req: Any
+        @RequestParam(name = "filters", defaultValue = "{}") filters: String
     ): ResponseEntity<Page<SuccessOrderTrackingResponse>> =
         withTimeout(TIMEOUT_MILLIS) {
+            val objectMapper = jacksonObjectMapper()
+
             ResponseEntity
                 .status(HttpStatus.OK)
                 .body(orderTrackingCoroutineService.getPageByFilters(
-                    GetOrderTrackingsByFiltersDto.of(req, page, size)
+                    GetOrderTrackingsByFiltersDto.of(
+                        objectMapper.readValue(filters, LinkedHashMap::class.java),
+                        page,
+                        size
+                    )
                 ).map { it.toSuccessHttpResponse() })
                 .also { log.info("response: $it") }
         }
