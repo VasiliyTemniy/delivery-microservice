@@ -276,7 +276,7 @@ class OrderTrackingCoroutineController(
                 .also { log.info("deleted all order trackings") }
         }
 
-    @GetMapping(path = ["/populate-test-data"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["/populate-test-data"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "populateTestData",
         summary = "Populate test data",
