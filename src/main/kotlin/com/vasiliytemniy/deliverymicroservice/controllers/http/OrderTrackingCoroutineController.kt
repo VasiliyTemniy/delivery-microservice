@@ -139,6 +139,8 @@ class OrderTrackingCoroutineController(
     /**
      * Request filters are in JSON format, but put in RequestParams as "filters"
      * to follow REST, HTTP 1.1 guidelines
+     * example test filters param: {"idFilters":[{"type":"order_id","id":"1231"},{"type":"carrier_id","id":"1234"}],"timeFilters":[{"type":"delivered_at","from":"null","to":"null"},{"type":"estimated_delivery_at","from":"2023-02-02T11:41:09.674114","to":"2025-02-02T11:41:09.674114"}],"eitherEqualStatusFilters":["DELIVERED","SHIPPED"],"neitherEqualStatusFilters":["ACCEPTED"],"nullablesFilters":[{"type":"estimated_delivery_at","isOrNotNull":true}],"hasMassMeasureFilter":true}
+     * example urlencoded: %7B%22idFilters%22%3A%5B%7B%22type%22%3A%22order_id%22%2C%22id%22%3A%221231%22%7D%2C%7B%22type%22%3A%22carrier_id%22%2C%22id%22%3A%221234%22%7D%5D%2C%22timeFilters%22%3A%5B%7B%22type%22%3A%22delivered_at%22%2C%22from%22%3A%22null%22%2C%22to%22%3A%22null%22%7D%2C%7B%22type%22%3A%22estimated_delivery_at%22%2C%22from%22%3A%222023-02-02T11%3A41%3A09.674114%22%2C%22to%22%3A%222025-02-02T11%3A41%3A09.674114%22%7D%5D%2C%22eitherEqualStatusFilters%22%3A%5B%22DELIVERED%22%2C%22SHIPPED%22%5D%2C%22neitherEqualStatusFilters%22%3A%5B%22ACCEPTED%22%5D%2C%22nullablesFilters%22%3A%5B%7B%22type%22%3A%22estimated_delivery_at%22%2C%22isOrNotNull%22%3Atrue%7D%5D%2C%22hasMassMeasureFilter%22%3Atrue%7D
      */
     @GetMapping(path = ["/by-filters"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
