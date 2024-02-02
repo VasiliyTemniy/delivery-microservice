@@ -39,15 +39,15 @@ fun buildOrderTrackingCustomFilterQuery(
         if (it.from == null && it.to == null) continue
         when {
             it.from != null && it.to != null -> {
-                countQuery += "$countQueryPrefix ${it.type} >= ${it.from} AND ${it.type} <= ${it.to} "
+                countQuery += "$countQueryPrefix ${it.type} >= '${it.from}' AND ${it.type} <= '${it.to}' "
                 criteriaList.add(Criteria.where(it.type.toString()).between(it.from, it.to))
             }
             it.from != null && it.to == null -> {
-                countQuery += "$countQueryPrefix ${it.type} >= ${it.from} "
+                countQuery += "$countQueryPrefix ${it.type} >= '${it.from}' "
                 criteriaList.add(Criteria.where(it.type.toString()).greaterThan(it.from))
             }
             it.to != null -> {
-                countQuery += "$countQueryPrefix ${it.type} <= ${it.to} "
+                countQuery += "$countQueryPrefix ${it.type} <= '${it.to}' "
                 criteriaList.add(Criteria.where(it.type.toString()).lessThan(it.to))
             }
         }
