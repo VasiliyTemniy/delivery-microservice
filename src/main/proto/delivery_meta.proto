@@ -32,8 +32,8 @@ message DeliveryCostParams {
 // Params for estimated delivery time calculation
 message DeliveryTimeParams {
   string deliveryVehicleType = 1; // "car", "truck", "plane", "train", "ship", "bicycle"
-  int32 estimatedDispatchTimeDeltaMs = 2; // sort, prepare, load, etc
-  int32 estimatedDestinationTimeDeltaMs = 3; // unload, prepare, sort, etc
+  int32 estimatedDispatchTimeDeltaHours = 2; // sort, prepare, load, etc
+  int32 estimatedDestinationTimeDeltaHours = 3; // unload, prepare, sort, etc
   optional int32 estimatedVehicleMedianSpeedKmH = 4;
 }
 

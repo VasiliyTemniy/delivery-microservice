@@ -35,8 +35,8 @@ data class DeliveryCostParamsDto(
 
 data class DeliveryTimeParamsDto(
     val deliveryVehicleType: DeliveryVehicleType,
-    val estimatedDispatchTimeDeltaMs: Int, // sort, prepare, load, etc
-    val estimatedDestinationTimeDeltaMs: Int, // unload, prepare, sort, etc
+    val estimatedDispatchTimeDeltaHours: Int, // sort, prepare, load, etc
+    val estimatedDestinationTimeDeltaHours: Int, // unload, prepare, sort, etc
     val estimatedVehicleMedianSpeedKmH: Int?
 ) {
     companion object
@@ -74,8 +74,8 @@ fun DeliveryCostParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryCostPara
 fun DeliveryTimeParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryTimeParams): DeliveryTimeParamsDto {
     return DeliveryTimeParamsDto(
         deliveryVehicleType = DeliveryVehicleType.fromValue(messageObj.deliveryVehicleType),
-        estimatedDispatchTimeDeltaMs = messageObj.estimatedDispatchTimeDeltaMs,
-        estimatedDestinationTimeDeltaMs = messageObj.estimatedDestinationTimeDeltaMs,
+        estimatedDispatchTimeDeltaHours = messageObj.estimatedDispatchTimeDeltaMs,
+        estimatedDestinationTimeDeltaHours = messageObj.estimatedDestinationTimeDeltaMs,
         estimatedVehicleMedianSpeedKmH = messageObj.estimatedVehicleMedianSpeedKmH
     )
 }
