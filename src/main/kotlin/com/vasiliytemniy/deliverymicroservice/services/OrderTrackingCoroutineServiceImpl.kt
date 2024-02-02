@@ -65,6 +65,20 @@ class OrderTrackingCoroutineServiceImpl(
             orderTrackingCoroutineRepository.findPageByCarrierId(requestDto.carrierId, requestDto.pageable, requestDto.filterActive)
         }
 
+    @Transactional(readOnly = true)
+    override suspend fun getPageByFilters(requestDto: GetOrderTrackingsByFiltersDto): Page<OrderTracking> =
+        withContext(Dispatchers.IO) {
+            orderTrackingCoroutineRepository.findPageByFilters(
+                requestDto.idFilters,
+                requestDto.timeFilters,
+                requestDto.eitherEqualStatusFilters,
+                requestDto.neitherEqualStatusFilters,
+                requestDto.nullablesFilters,
+                requestDto.hasMassMeasureFilter,
+                requestDto.pageable
+            )
+        }
+
     // TODO: consider implementing with single SQL query
     @Transactional
     override suspend fun setStatuses(requestDto: SetOrderTrackingStatusesDto): List<OrderTracking> =

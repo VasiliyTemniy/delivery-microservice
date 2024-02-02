@@ -22,6 +22,8 @@ interface OrderTrackingCoroutineService {
 
     suspend fun getPageByCarrierId(requestDto: GetOrderTrackingsByCarrierIdDto): Page<OrderTracking>
 
+    suspend fun getPageByFilters(requestDto: GetOrderTrackingsByFiltersDto): Page<OrderTracking>
+
     suspend fun setStatuses(requestDto: SetOrderTrackingStatusesDto): List<OrderTracking>
 
     suspend fun reorder(requestDto: ReorderOrderTrackingsDto, performRequestCheck: Boolean = true): List<OrderTracking>
