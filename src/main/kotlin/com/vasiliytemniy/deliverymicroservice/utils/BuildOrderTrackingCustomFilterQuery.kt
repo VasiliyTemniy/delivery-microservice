@@ -17,7 +17,7 @@ fun buildOrderTrackingCustomFilterQuery(
     hasMassMeasureFilter: Boolean,
 ): Pair<String, Query> {
 
-    var countQuery = "SELECT count(id) AS total FROM order_tracking "
+    var countQuery = "SELECT count(id) AS total FROM delivery.order_trackings "
     var countQueryPrefix = "WHERE"
 
     val query = Query.query(Criteria.empty())
@@ -26,7 +26,7 @@ fun buildOrderTrackingCustomFilterQuery(
 
     // Apply id filters
     for (it in idFilters) {
-        countQuery += "$countQueryPrefix ${it.type} = ${it.id} "
+        countQuery += "$countQueryPrefix ${it.type} = '${it.id}' "
         query.apply { Criteria.where(it.type.toString()).isEqual(it.id) }
         if (isFirstFilter) {
             countQueryPrefix = "AND"
@@ -65,7 +65,7 @@ fun buildOrderTrackingCustomFilterQuery(
     var isFirstEitherStatusModifier = true
 
     for (it in eitherEqualStatusFilters) {
-        eitherStatusQueryModifier += eitherStatusQueryPrefix + "status = $it "
+        eitherStatusQueryModifier += eitherStatusQueryPrefix + "status = '$it' "
         eitherStatusQueryCriteria.apply { or(it) }
         if (isFirstEitherStatusModifier) {
             isFirstEitherStatusModifier = false
@@ -81,7 +81,7 @@ fun buildOrderTrackingCustomFilterQuery(
 
     // Apply neither status filters
     for (it in neitherEqualStatusFilters) {
-        countQuery += "$countQueryPrefix status != $it "
+        countQuery += "$countQueryPrefix status != '$it' "
         query.apply { Criteria.where("status").not(it) }
         if (isFirstFilter) {
             countQueryPrefix = "AND"
