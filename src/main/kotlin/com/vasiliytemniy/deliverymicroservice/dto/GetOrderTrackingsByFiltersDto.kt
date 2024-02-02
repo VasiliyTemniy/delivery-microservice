@@ -40,13 +40,13 @@ data class NullablesFilterGroup(
 fun GetOrderTrackingsByFiltersDto.Companion.of(request: OrderTracking.GetPageByFiltersRequest): GetOrderTrackingsByFiltersDto =
     GetOrderTrackingsByFiltersDto(
         request.idFilterGroupsList.toList()
-            .map { IdFilterGroup(IdFilterType.valueOf(it.type), it.id) },
+            .map { IdFilterGroup(IdFilterType.fromValue(it.type), it.id) },
         request.timeFilterGroupsList.toList()
-            .map { TimeFilterGroup(TimeFilterType.valueOf(it.type), parseOptionalDate(it.from), parseOptionalDate(it.to)) },
+            .map { TimeFilterGroup(TimeFilterType.fromValue(it.type), parseOptionalDate(it.from), parseOptionalDate(it.to)) },
         request.eitherEqualStatusFiltersList.toList(),
         request.neitherEqualStatusFiltersList.toList(),
         request.nullablesFilterGroupsList.toList()
-            .map { NullablesFilterGroup(NullablesFilterType.valueOf(it.type), it.isOrNotNull) },
+            .map { NullablesFilterGroup(NullablesFilterType.fromValue(it.type), it.isOrNotNull) },
         request.hasMassMeasureFilter,
         PageRequest.of(request.page, request.size)
     )
@@ -114,7 +114,7 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
 
             try {
                 parsedTimeFilters.add(TimeFilterGroup(
-                    TimeFilterType.valueOf(it["type"] as String),
+                    TimeFilterType.fromValue(it["type"] as String),
                     parseOptionalDate(it["from"] as String?),
                     parseOptionalDate(it["to"] as String?))
                 )
@@ -179,7 +179,7 @@ fun GetOrderTrackingsByFiltersDto.Companion.of(request: Any, page: Int, size: In
 
             try {
                 parsedNullablesFilters.add(NullablesFilterGroup(
-                    NullablesFilterType.valueOf(it["type"] as String),
+                    NullablesFilterType.fromValue(it["type"] as String),
                     it["isOrNotNull"] as Boolean)
                 )
             } catch (e: IllegalArgumentException) {
