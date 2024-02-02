@@ -6,6 +6,6 @@ import com.vasiliytemniy.deliverymicroservice.dto.CalculateDeliveryMetaDto
 
 interface DeliveryMetaService {
 
-    fun calculateDeliveryMeta(requestDto: CalculateDeliveryMetaDto): DeliveryMeta
+    suspend fun calculateDeliveryMeta(requestDto: CalculateDeliveryMetaDto): DeliveryMeta
 
 }

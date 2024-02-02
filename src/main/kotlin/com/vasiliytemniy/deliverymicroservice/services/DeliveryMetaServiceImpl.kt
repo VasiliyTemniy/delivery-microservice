@@ -6,7 +6,7 @@ import com.vasiliytemniy.deliverymicroservice.dto.CalculateDeliveryMetaDto
 
 class DeliveryMetaServiceImpl(): DeliveryMetaService {
 
-    override fun calculateDeliveryMeta(requestDto: CalculateDeliveryMetaDto): DeliveryMeta {
+    override suspend fun calculateDeliveryMeta(requestDto: CalculateDeliveryMetaDto): DeliveryMeta {
         TODO("Not yet implemented")
     }
 
