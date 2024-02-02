@@ -16,7 +16,7 @@ data class CalculateDeliveryMetaDto(
 }
 
 data class DeliveryCostParamsDto(
-    val calculationType: List<DeliveryCostCalculationType>,
+    val calculationTypes: List<DeliveryCostCalculationType>,
     val fixedCostAddon: Int?,
     val distanceStepCost: Int?,
     val distanceStepQuantity: Int?,
@@ -55,7 +55,7 @@ fun CalculateDeliveryMetaDto.Companion.of(request: DeliveryMeta.CalculateDeliver
 
 fun DeliveryCostParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryCostParams): DeliveryCostParamsDto {
     return DeliveryCostParamsDto(
-        calculationType = messageObj.calculationTypeList.map { DeliveryCostCalculationType.fromValue(it) },
+        calculationTypes = messageObj.calculationTypeList.map { DeliveryCostCalculationType.fromValue(it) },
         fixedCostAddon = messageObj.fixedCostAddon,
         distanceStepCost = messageObj.distanceStepCost,
         distanceStepQuantity = messageObj.distanceStepQuantity,
