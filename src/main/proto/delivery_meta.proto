@@ -9,7 +9,7 @@ service DeliveryMetaService {
 
 // Currency is not needed here - cost calculation is abstract for given costs
 message DeliveryCostParams {
-  string calculationType = 1; // "fixed", "distance", "mass", "volume"
+  repeated string calculationType = 1; // "fixed", "distance", "mass", "volume"
   optional int32 fixedCostAddon = 3;
   optional int32 distanceStepCost = 4;
   optional int32 distanceStepQuantity = 5;
@@ -20,17 +20,15 @@ message DeliveryCostParams {
   optional int32 volumeStepCost = 10;
   optional int32 volumeStepQuantity = 11;
   optional string volumeStepMeasure = 12;
-  optional string fromAddress = 13;
-  optional string toAddress = 14;
-  optional int32 mass = 15;
-  optional int32 volume = 16;
+  optional int32 mass = 13;
+  optional int32 volume = 14;
 }
 
 // Params for estimated delivery time calculation
 message DeliveryTimeParams {
-  string deliveryVehicleType = 1;
-  int32 estimatedDispatchTimeDeltaMs = 2;
-  int32 estimatedDestinationTimeDeltaMs = 3;
+  string deliveryVehicleType = 1; // "car", "truck", "plane", "train", "ship", "bicycle"
+  int32 estimatedDispatchTimeDeltaMs = 2; // sort, prepare, load, etc
+  int32 estimatedDestinationTimeDeltaMs = 3; // unload, prepare, sort, etc
   optional int32 estimatedVehicleMedianSpeedKmH = 4;
 }
 
@@ -39,8 +37,10 @@ message DeliveryTimeParams {
 
 message CalculateDeliveryMetaRequest {
   string metaCalculationType = 1; // "onlyCost", "onlyEstimatedTime", "costAndEstimatedTime"
-  optional DeliveryCostParams deliveryCostParams = 2;
-  optional DeliveryTimeParams deliveryTimeParams = 3;
+  optional string fromAddress = 2;
+  optional string toAddress = 3;
+  optional DeliveryCostParams deliveryCostParams = 4;
+  optional DeliveryTimeParams deliveryTimeParams = 5;
 }
 
 
