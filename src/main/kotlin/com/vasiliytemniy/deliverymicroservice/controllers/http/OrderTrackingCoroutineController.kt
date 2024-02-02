@@ -135,6 +135,27 @@ class OrderTrackingCoroutineController(
                 .also { log.info("response: $it") }
         }
 
+    @GetMapping(path = ["/by-filters"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @Operation(
+        method = "getPageOrderTrackingsByFilters",
+        summary = "Get order trackings by filters",
+        operationId = "getPageOrderTrackingsByFilters",
+        description = "Get order trackings by filters"
+    )
+    suspend fun getPageOrderTrackingsByFilters(
+        @RequestParam(name = "page", defaultValue = "0") page: Int,
+        @RequestParam(name = "size", defaultValue = "10") size: Int,
+        @RequestBody req: Any
+    ): ResponseEntity<Page<SuccessOrderTrackingResponse>> =
+        withTimeout(TIMEOUT_MILLIS) {
+            ResponseEntity
+                .status(HttpStatus.OK)
+                .body(orderTrackingCoroutineService.getPageByFilters(
+                    GetOrderTrackingsByFiltersDto.of(req, page, size)
+                ).map { it.toSuccessHttpResponse() })
+                .also { log.info("response: $it") }
+        }
+
     @PutMapping(path = ["/status"], produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "setOrderTrackingStatuses",
