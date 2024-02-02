@@ -20,14 +20,14 @@ fun buildOrderTrackingCustomFilterQuery(
     var countQuery = "SELECT count(id) AS total FROM delivery.order_trackings "
     var countQueryPrefix = "WHERE"
 
-    val query = Query.query(Criteria.empty())
+    val criteriaList: MutableList<Criteria> = mutableListOf()
 
     var isFirstFilter = true
 
     // Apply id filters
     for (it in idFilters) {
         countQuery += "$countQueryPrefix ${it.type} = '${it.id}' "
-        query.apply { Criteria.where(it.type.toString()).isEqual(it.id) }
+        criteriaList.add(Criteria.where(it.type.toString()).isEqual(it.id))
         if (isFirstFilter) {
             countQueryPrefix = "AND"
             isFirstFilter = false
@@ -40,15 +40,15 @@ fun buildOrderTrackingCustomFilterQuery(
         when {
             it.from != null && it.to != null -> {
                 countQuery += "$countQueryPrefix ${it.type} >= ${it.from} AND ${it.type} <= ${it.to} "
-                query.apply { Criteria.where(it.type.toString()).between(it.from, it.to) }
+                criteriaList.add(Criteria.where(it.type.toString()).between(it.from, it.to))
             }
             it.from != null && it.to == null -> {
                 countQuery += "$countQueryPrefix ${it.type} >= ${it.from} "
-                query.apply { Criteria.where(it.type.toString()).greaterThan(it.from) }
+                criteriaList.add(Criteria.where(it.type.toString()).greaterThan(it.from))
             }
             it.to != null -> {
                 countQuery += "$countQueryPrefix ${it.type} <= ${it.to} "
-                query.apply { Criteria.where(it.type.toString()).lessThan(it.to) }
+                criteriaList.add(Criteria.where(it.type.toString()).lessThan(it.to))
             }
         }
         if (isFirstFilter) {
@@ -66,7 +66,7 @@ fun buildOrderTrackingCustomFilterQuery(
 
     for (it in eitherEqualStatusFilters) {
         eitherStatusQueryModifier += eitherStatusQueryPrefix + "status = '$it' "
-        eitherStatusQueryCriteria.apply { or(it) }
+        eitherStatusQueryCriteria.or(Criteria.where("status").isEqual(it))
         if (isFirstEitherStatusModifier) {
             isFirstEitherStatusModifier = false
             eitherStatusQueryPrefix = "OR "
@@ -76,13 +76,13 @@ fun buildOrderTrackingCustomFilterQuery(
     // Apply either status query block to main queries
     if (eitherEqualStatusFilters.isNotEmpty()) {
         countQuery += "$countQueryPrefix (${eitherStatusQueryModifier.trimEnd()}) "
-        query.apply { Criteria.from(eitherStatusQueryCriteria) }
+        criteriaList.add(eitherStatusQueryCriteria)
     }
 
     // Apply neither status filters
     for (it in neitherEqualStatusFilters) {
         countQuery += "$countQueryPrefix status != '$it' "
-        query.apply { Criteria.where("status").not(it) }
+        criteriaList.add(Criteria.where("status").not(it))
         if (isFirstFilter) {
             countQueryPrefix = "AND"
             isFirstFilter = false
@@ -93,18 +93,18 @@ fun buildOrderTrackingCustomFilterQuery(
     for (it in nullablesFilters) {
         if (it.isOrNotNull) {
             countQuery += "$countQueryPrefix ${it.type} IS NULL "
-            query.apply { Criteria.where(it.type.toString()).isNull() }
+            criteriaList.add(Criteria.where(it.type.toString()).isNull())
         } else {
             countQuery += "$countQueryPrefix ${it.type} IS NOT NULL "
-            query.apply { Criteria.where(it.type.toString()).isNotNull() }
+            criteriaList.add(Criteria.where(it.type.toString()).isNotNull())
         }
     }
 
     // Apply "hasMassMeasure" filter
     if (hasMassMeasureFilter) {
         countQuery += "$countQueryPrefix mass_measure IS NOT NULL"
-        query.apply { Criteria.where(OrderTracking.MASS_MEASURE).isNotNull() }
+        criteriaList.add(Criteria.where(OrderTracking.MASS_MEASURE).isNotNull())
     }
 
-    return countQuery.trimEnd() to query
+    return countQuery.trimEnd() to Query.query(Criteria.from(criteriaList))
 }
