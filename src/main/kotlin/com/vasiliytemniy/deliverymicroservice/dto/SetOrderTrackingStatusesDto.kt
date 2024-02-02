@@ -30,8 +30,10 @@ fun SetOrderTrackingStatusesDto.Companion.of(request: OrderTracking.SetStatusesR
 
 
 fun SetOrderTrackingStatusesDto.Companion.of(request: Any): SetOrderTrackingStatusesDto {
+    val invalidRequestPrefix = "Invalid request: setOrderTrackingStatuses: "
+
     if (request !is LinkedHashMap<*, *>)
-        throw IllegalArgumentException("Invalid request")
+        throw IllegalArgumentException("$invalidRequestPrefix invalid request body$")
 
     if (
         request.keys.size != 3
@@ -40,13 +42,13 @@ fun SetOrderTrackingStatusesDto.Companion.of(request: Any): SetOrderTrackingStat
         || request["status"] !is String
         || !(request["deliveredAt"] is String || request["deliveredAt"] == null)
     )
-        throw IllegalArgumentException("Invalid request: invalid request body")
+        throw IllegalArgumentException("$invalidRequestPrefix invalid request body")
 
 
     val orderTrackingExternalIds = request["orderTrackingExternalIds"] as List<*>
 
     if (orderTrackingExternalIds.isEmpty())
-        throw IllegalArgumentException("Invalid request: orderTrackingExternalIds must not be empty")
+        throw IllegalArgumentException("$invalidRequestPrefix orderTrackingExternalIds must not be empty")
 
     val parsedOrderTrackingExternalIds = mutableListOf<OrderTrackingExternalIdDto>()
 
@@ -57,7 +59,7 @@ fun SetOrderTrackingStatusesDto.Companion.of(request: Any): SetOrderTrackingStat
             || !(it["orderId"] is String || it["orderId"] is Int)
             || it["pointNumber"] !is Int
         )
-            throw IllegalArgumentException("Invalid request: invalid orderTrackingExternalIds")
+            throw IllegalArgumentException("$invalidRequestPrefix invalid orderTrackingExternalIds")
 
         val stringifiedOrderId =
             if (it["orderId"] is String)
