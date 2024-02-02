@@ -9,4 +9,16 @@ enum class TimeFilterType(val value: String) {
     override fun toString(): String {
         return super.toString().lowercase()
     }
+
+    companion object {
+        fun isTimeFilterType(value: String): Boolean {
+            return when (value) {
+                "estimated_delivery_at" -> true
+                "delivered_at" -> true
+                "created_at" -> true
+                "updated_at" -> true
+                else -> false
+            }
+        }
+    }
 }

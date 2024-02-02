@@ -9,4 +9,16 @@ enum class IdFilterType(val value: String) {
     override fun toString(): String {
         return super.toString().lowercase()
     }
+
+    companion object {
+        fun isIdFilterType(value: String): Boolean {
+            return when (value) {
+                "order_id" -> true
+                "carrier_id" -> true
+                "from_facility_id" -> true
+                "destination_id" -> true
+                else -> false
+            }
+        }
+    }
 }

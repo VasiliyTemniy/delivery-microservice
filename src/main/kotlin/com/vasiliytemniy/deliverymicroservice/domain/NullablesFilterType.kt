@@ -12,4 +12,18 @@ enum class NullablesFilterType(val value: String) {
     override fun toString(): String {
         return super.toString().lowercase()
     }
+
+    companion object {
+        fun isNullablesFilterType(value: String): Boolean {
+            return when (value) {
+                "mass_control_value" -> true
+                "mass_measure" -> true
+                "lat" -> true
+                "lon" -> true
+                "estimated_delivery_at" -> true
+                "delivered_at" -> true
+                else -> false
+            }
+        }
+    }
 }
