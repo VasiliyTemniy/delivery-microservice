@@ -5,7 +5,7 @@ class SqlQueries {
     companion object {
         const val FIND_LAST_BY_ORDER_ID_SQL_QUERY = """
             SELECT * FROM delivery.order_trackings
-            WHERE order_id = :orderId
+            WHERE order_id = :orderId AND status != 'planned'
             ORDER BY point_number DESC
             LIMIT 1
         """
@@ -82,7 +82,7 @@ class SqlQueries {
         const val SELECT_COUNT_ACTIVE_BY_CARRIER_ID_SQL_QUERY = """
             SELECT count(id) AS total FROM delivery.order_trackings
             WHERE
-                carrier_id = :carrierId AND delivered_at IS NULL
+                carrier_id = :carrierId AND status = 'transit'
         """
     }
 
