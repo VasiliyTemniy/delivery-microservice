@@ -3,6 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.repositories
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.CARRIER_ID
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.ORDER_ID
+import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.STATUS
 import com.vasiliytemniy.deliverymicroservice.domain.of
 import com.vasiliytemniy.deliverymicroservice.dto.IdFilterGroup
 import com.vasiliytemniy.deliverymicroservice.dto.NullablesFilterGroup
@@ -78,7 +79,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
             val query = if (filterActive)
                 Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId))
             else
-                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and("delivered_at").isNull())
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and(STATUS).isEqual("transit"))
 
             val orderTrackingList = async {
                 template.select(query.with(pageable), OrderTracking::class.java)
@@ -137,7 +138,7 @@ class OrderTrackingCoroutineCustomRepositoryImpl(
             ).asFlow()
         } else {
             template.select(
-                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and("delivered_at").isNull()),
+                Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and(STATUS).isEqual("transit")),
                 OrderTracking::class.java
             ).asFlow()
         }

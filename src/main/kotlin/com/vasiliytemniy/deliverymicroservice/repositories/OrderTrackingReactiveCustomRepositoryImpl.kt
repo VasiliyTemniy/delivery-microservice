@@ -1,14 +1,10 @@
 package com.vasiliytemniy.deliverymicroservice.repositories
 
 import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking
+import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.CARRIER_ID
+import com.vasiliytemniy.deliverymicroservice.domain.OrderTracking.Companion.STATUS
 import com.vasiliytemniy.deliverymicroservice.domain.of
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.reactive.asFlow
-import kotlinx.coroutines.reactive.awaitFirst
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.relational.core.query.Criteria
@@ -29,18 +25,18 @@ class OrderTrackingReactiveCustomRepositoryImpl(
         filterActive: Boolean
     ): Flux<OrderTracking> {
         val query = if (filterActive)
-            Query.query(Criteria.where("carrier_id").isEqual(carrierId))
+            Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId))
         else
-            Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull())
+            Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and(STATUS).isEqual("transit"))
 
         return template.select(query.with(pageable), OrderTracking::class.java)
     }
 
     override fun findAllByCarrierId(carrierId: String, filterActive: Boolean): Flux<OrderTracking> {
         val query = if (filterActive)
-            Query.query(Criteria.where("carrier_id").isEqual(carrierId))
+            Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId))
         else
-            Query.query(Criteria.where("carrier_id").isEqual(carrierId).and("delivered_at").isNull())
+            Query.query(Criteria.where(CARRIER_ID).isEqual(carrierId).and(STATUS).isEqual("transit"))
 
         return template.select(query, OrderTracking::class.java)
     }
