@@ -14,7 +14,9 @@ import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
 @Configuration
 class DBConnectionConfig: AbstractR2dbcConfiguration() {
 
-    val dotenvInstance = dotenv()
+    // Seems like ignore if missing == true does not work while the app is in docker for some reason
+    // Thus, I'll put empty .env.docker.fake in the project root with docker instruction to copy and rename to .env
+    val dotenvInstance = dotenv { ignoreIfMissing = true }
 
     @Override
     @Bean
