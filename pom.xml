@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.vasiliytemniy</groupId>
 	<artifactId>delivery-microservice</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.9.0-SNAPSHOT</version>
 	<name>delivery-microservice</name>
 	<description>Delivery microservice</description>
 	<properties>
