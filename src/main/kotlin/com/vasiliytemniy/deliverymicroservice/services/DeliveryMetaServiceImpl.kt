@@ -44,7 +44,7 @@ class DeliveryMetaServiceImpl(
                 if (requestDto.fromAddress == null || requestDto.toAddress == null) {
                     throw IllegalArgumentException("From and to addresses should not be null for distance-based delivery cost calculation")
                 }
-                distanceInMeters = getRouteMeta(requestDto.fromAddress, requestDto.toAddress).first
+                distanceInMeters = getRouteMeta(requestDto.fromAddress, requestDto.toAddress, null).first
             }
 
             // Early return
@@ -61,7 +61,12 @@ class DeliveryMetaServiceImpl(
         if (requestDto.fromAddress == null || requestDto.toAddress == null) {
             throw IllegalArgumentException("From and to addresses should not be null for estimated delivery time calculation")
         }
-        val (distanceInMeters, externalEstimatedTime) = getRouteMeta(requestDto.fromAddress, requestDto.toAddress)
+        val (distanceInMeters, externalEstimatedTime) =
+            getRouteMeta(
+                requestDto.fromAddress,
+                requestDto.toAddress,
+                requestDto.deliveryTimeParams?.deliveryVehicleType
+            )
 
         if (requestDto.metaCalculationType == DeliveryMetaCalculationType.ONLY_ESTIMATED_TIME) {
             if (requestDto.deliveryTimeParams == null) {
@@ -105,7 +110,11 @@ class DeliveryMetaServiceImpl(
         throw IllegalArgumentException("Unknown meta calculation type: ${requestDto.metaCalculationType}")
     }
 
-    private suspend fun getRouteMeta(fromAddress: String, toAddress: String): Pair<Double, Long> {
+    private suspend fun getRouteMeta(
+        fromAddress: String,
+        toAddress: String,
+        vehicleType: DeliveryVehicleType?
+    ): Pair<Double, Long> {
 
         if (fromAddress == toAddress) {
             return Pair(0.0, 0)
@@ -117,7 +126,7 @@ class DeliveryMetaServiceImpl(
             return Pair(0.0, 0)
         }
 
-        return requestRouteMeta(from, to)
+        return requestRouteMeta(from, to, vehicleType)
     }
 
     /**
@@ -149,12 +158,30 @@ class DeliveryMetaServiceImpl(
     /**
      * Returns Pair of distance in meters as Double and time in milliseconds as Long
      */
-    private suspend fun requestRouteMeta(fromPoint: GeocodingPoint, toPoint: GeocodingPoint): Pair<Double, Long> =
+    private suspend fun requestRouteMeta(
+        fromPoint: GeocodingPoint,
+        toPoint: GeocodingPoint,
+        vehicleType: DeliveryVehicleType?
+    ): Pair<Double, Long> =
         withContext(Dispatchers.IO) {
+
+            val requestProfileParam = when (vehicleType) {
+                DeliveryVehicleType.CAR -> "car"
+                DeliveryVehicleType.TRUCK -> "truck"
+                DeliveryVehicleType.BICYCLE -> "bike"
+                DeliveryVehicleType.SCOOTER -> "scooter_delivery"
+                else -> "car"
+            }
 
             val response = async {
                 webClient.get()
-                    .uri("https://graphhopper.com/api/1/route?point=${fromPoint.lat},${fromPoint.lng}&point=${toPoint.lat},${toPoint.lng}&key=$graphhopperApiKey")
+                    .uri("""
+                        https://graphhopper.com/api/1/route?point=${fromPoint.lat},${fromPoint.lng}
+                        &point=${toPoint.lat},${toPoint.lng}
+                        &profile=$requestProfileParam
+                        &key=$graphhopperApiKey
+                        """
+                        .trimIndent())
                     .exchangeToMono { clientResponse ->
                         clientResponse.bodyToMono(GraphhopperRouteResponse::class.java)
                     }
@@ -183,6 +210,7 @@ class DeliveryMetaServiceImpl(
                 DeliveryVehicleType.TRAIN -> 55
                 DeliveryVehicleType.SHIP -> 30
                 DeliveryVehicleType.BICYCLE -> 20
+                DeliveryVehicleType.SCOOTER -> 40
             }
 
         // Meters in millisecond
