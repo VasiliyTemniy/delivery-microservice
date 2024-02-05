@@ -14,6 +14,10 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.slf4j.LoggerFactory
 
 
+/**
+ * TODO: add redis caching;
+ * TODO: add different distance calculation for vehicle === plane / train / ship
+ */
 @Service
 class DeliveryMetaServiceImpl(
     //TODO add redis caching! Redis Repository inject here
@@ -167,21 +171,19 @@ class DeliveryMetaServiceImpl(
 
             val requestProfileParam = when (vehicleType) {
                 DeliveryVehicleType.CAR -> "car"
-                DeliveryVehicleType.TRUCK -> "truck"
+//                DeliveryVehicleType.TRUCK -> "truck" // is not included in free plan
                 DeliveryVehicleType.BICYCLE -> "bike"
-                DeliveryVehicleType.SCOOTER -> "scooter_delivery"
+//                DeliveryVehicleType.SCOOTER -> "scooter_delivery" // is not included in free plan
+                DeliveryVehicleType.FOOT -> "foot"
                 else -> "car"
             }
 
             val response = async {
                 webClient.get()
-                    .uri("""
-                        https://graphhopper.com/api/1/route?point=${fromPoint.lat},${fromPoint.lng}
-                        &point=${toPoint.lat},${toPoint.lng}
-                        &profile=$requestProfileParam
-                        &key=$graphhopperApiKey
-                        """
-                        .trimIndent())
+                    .uri("https://graphhopper.com/api/1/route?point=${fromPoint.lat},${fromPoint.lng}" +
+                        "&point=${toPoint.lat},${toPoint.lng}" +
+                        "&profile=$requestProfileParam" +
+                        "&key=$graphhopperApiKey")
                     .exchangeToMono { clientResponse ->
                         clientResponse.bodyToMono(GraphhopperRouteResponse::class.java)
                     }
@@ -211,6 +213,7 @@ class DeliveryMetaServiceImpl(
                 DeliveryVehicleType.SHIP -> 30
                 DeliveryVehicleType.BICYCLE -> 20
                 DeliveryVehicleType.SCOOTER -> 40
+                DeliveryVehicleType.FOOT -> 4
             }
 
         // Meters in millisecond
