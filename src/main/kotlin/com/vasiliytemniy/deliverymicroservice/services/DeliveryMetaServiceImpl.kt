@@ -37,20 +37,21 @@ class DeliveryMetaServiceImpl(
                 throw IllegalArgumentException("Delivery cost params should not be null for 'only cost' calculation")
             }
 
-            val distanceInMeters: Int? = if (requestDto.deliveryCostParams.calculationTypes.contains(DeliveryCostCalculationType.DISTANCE)) {
+            var distanceInMeters: Double? = null
+
+            // Check if distance calculation is required to avoid unnecessary external api calls
+            if (requestDto.deliveryCostParams.calculationTypes.contains(DeliveryCostCalculationType.DISTANCE)) {
                 if (requestDto.fromAddress == null || requestDto.toAddress == null) {
                     throw IllegalArgumentException("From and to addresses should not be null for distance-based delivery cost calculation")
                 }
-                getDistanceInMeters(requestDto.fromAddress, requestDto.toAddress)
-            } else {
-                null
+                distanceInMeters = getRouteMeta(requestDto.fromAddress, requestDto.toAddress).first
             }
 
             // Early return
             return DeliveryMeta(
                 cost = calculateDeliveryCost(
                     requestDto.deliveryCostParams,
-                    distanceInMeters
+                    distanceInMeters?.toInt()
                 ),
                 estimatedDeliveryMs = null
             )
@@ -60,20 +61,23 @@ class DeliveryMetaServiceImpl(
         if (requestDto.fromAddress == null || requestDto.toAddress == null) {
             throw IllegalArgumentException("From and to addresses should not be null for estimated delivery time calculation")
         }
-        val distanceInMeters: Int = getDistanceInMeters(requestDto.fromAddress, requestDto.toAddress)
+        val (distanceInMeters, externalEstimatedTime) = getRouteMeta(requestDto.fromAddress, requestDto.toAddress)
 
         if (requestDto.metaCalculationType == DeliveryMetaCalculationType.ONLY_ESTIMATED_TIME) {
             if (requestDto.deliveryTimeParams == null) {
                 throw IllegalArgumentException("Delivery time params should not be null for 'only estimated time' calculation")
             }
 
+            val estimatedDeliveryMs = if (requestDto.deliveryTimeParams.useExternalTimeEstimation) {
+                externalEstimatedTime
+            } else {
+                calculateEstimatedDeliveryTimeMs(requestDto.deliveryTimeParams, distanceInMeters.toInt())
+            }
+
             // Early return
             return  DeliveryMeta(
                 cost = null,
-                estimatedDeliveryMs = calculateEstimatedDeliveryTimeMs(
-                    requestDto.deliveryTimeParams,
-                    distanceInMeters
-                )
+                estimatedDeliveryMs = estimatedDeliveryMs
             )
         }
 
@@ -82,37 +86,43 @@ class DeliveryMetaServiceImpl(
                 throw IllegalArgumentException("Delivery cost params and delivery time params should not be null for 'cost and estimated time' calculation")
             }
 
+            val estimatedDeliveryMs = if (requestDto.deliveryTimeParams.useExternalTimeEstimation) {
+                externalEstimatedTime
+            } else {
+                calculateEstimatedDeliveryTimeMs(requestDto.deliveryTimeParams, distanceInMeters.toInt())
+            }
+
             // Early return
             return  DeliveryMeta(
                 cost = calculateDeliveryCost(
                     requestDto.deliveryCostParams,
-                    distanceInMeters
+                    distanceInMeters.toInt()
                 ),
-                estimatedDeliveryMs = calculateEstimatedDeliveryTimeMs(
-                    requestDto.deliveryTimeParams,
-                    distanceInMeters
-                )
+                estimatedDeliveryMs = estimatedDeliveryMs
             )
         }
 
         throw IllegalArgumentException("Unknown meta calculation type: ${requestDto.metaCalculationType}")
     }
 
-    private suspend fun getDistanceInMeters(fromAddress: String, toAddress: String): Int {
+    private suspend fun getRouteMeta(fromAddress: String, toAddress: String): Pair<Double, Long> {
 
         if (fromAddress == toAddress) {
-            return 0
+            return Pair(0.0, 0)
         }
 
         val (from, to) = requestGeocoding(fromAddress, toAddress)
 
         if (from == to) {
-            return 0
+            return Pair(0.0, 0)
         }
 
-        return requestPathDistance(from, to)
+        return requestRouteMeta(from, to)
     }
 
+    /**
+     * Returns Pair of geolocation points - from and to
+     */
     private suspend fun requestGeocoding(fromAddress: String, toAddress: String): Pair<GeocodingPoint, GeocodingPoint> =
         withContext(Dispatchers.IO) {
             val from = async {
@@ -136,7 +146,10 @@ class DeliveryMetaServiceImpl(
             Pair(from.await().hits.first().point, to.await().hits.first().point)
         }
 
-    private suspend fun requestPathDistance(fromPoint: GeocodingPoint, toPoint: GeocodingPoint): Int =
+    /**
+     * Returns Pair of distance in meters as Double and time in milliseconds as Long
+     */
+    private suspend fun requestRouteMeta(fromPoint: GeocodingPoint, toPoint: GeocodingPoint): Pair<Double, Long> =
         withContext(Dispatchers.IO) {
 
             val response = async {
@@ -148,20 +161,21 @@ class DeliveryMetaServiceImpl(
                     .awaitFirst()
             }
 
-            var distance = 0
+            val routeResponse = response.await()
 
-            for (path in response.await().paths) {
-                distance += path.distance.toInt()
-            }
-
-            distance
+            Pair(
+                routeResponse.paths.first().distance,
+                routeResponse.paths.first().time
+            )
         }
 
     /**
      * Returns estimated delivery time in milliseconds
      */
     private fun calculateEstimatedDeliveryTimeMs(timeParams: DeliveryTimeParamsDto, distanceInMeters: Int): Long {
+        // If estimated speed is provided in request, use it
         val estimatedMedianSpeedKmH = timeParams.estimatedVehicleMedianSpeedKmH?:
+            // Does not consider any traffic jams
             when (timeParams.deliveryVehicleType) {
                 DeliveryVehicleType.CAR -> 70
                 DeliveryVehicleType.TRUCK -> 60

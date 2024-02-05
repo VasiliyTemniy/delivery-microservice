@@ -11,7 +11,7 @@ data class GraphhopperRouteResponse(
 // Only distance is needed actually, so other fields are omitted
 data class GraphhopperRouteResponsePath(
     val distance: Double,
-    val time: Int,
+    val time: Long,
     val ascend: Double,
     val descend: Double,
 //    val points: String, // actual format depends on points_encoded - manual deserialize needed

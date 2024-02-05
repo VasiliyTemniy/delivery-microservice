@@ -37,6 +37,7 @@ data class DeliveryTimeParamsDto(
     val deliveryVehicleType: DeliveryVehicleType,
     val estimatedDispatchTimeDeltaMs: Long, // sort, prepare, load, etc
     val estimatedDestinationTimeDeltaMs: Long, // unload, prepare, sort, etc
+    val useExternalTimeEstimation: Boolean,
     val estimatedVehicleMedianSpeedKmH: Int?
 ) {
     companion object
@@ -76,6 +77,7 @@ fun DeliveryTimeParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryTimePara
         deliveryVehicleType = DeliveryVehicleType.fromValue(messageObj.deliveryVehicleType),
         estimatedDispatchTimeDeltaMs = messageObj.estimatedDispatchTimeDeltaMs,
         estimatedDestinationTimeDeltaMs = messageObj.estimatedDestinationTimeDeltaMs,
+        useExternalTimeEstimation = messageObj.useExternalTimeEstimation,
         estimatedVehicleMedianSpeedKmH = messageObj.estimatedVehicleMedianSpeedKmH
     )
 }

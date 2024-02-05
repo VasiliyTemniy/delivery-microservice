@@ -55,6 +55,7 @@ class DeliveryMetaController(
         @RequestParam(name = "delivery-vehicle-type", defaultValue = "car") deliveryVehicleType: String,
         @RequestParam(name = "estimated-dispatch-time-delta-ms", defaultValue = "0") estimatedDispatchTimeDeltaMs: Long,
         @RequestParam(name = "estimated-destination-time-delta-ms", defaultValue = "0") estimatedDestinationTimeDeltaMs: Long,
+        @RequestParam(name = "use-external-time-estimation", defaultValue = "false") useExternalTimeEstimation: Boolean,
         @RequestParam(name = "estimated-vehicle-median-speed-km-h") estimatedVehicleMedianSpeedKmH: Int?
     ): ResponseEntity<SuccessDeliveryMetaResponse> =
         withTimeout(TIMEOUT_MILLIS) {
@@ -84,6 +85,7 @@ class DeliveryMetaController(
                             DeliveryVehicleType.fromValue(deliveryVehicleType),
                             estimatedDispatchTimeDeltaMs,
                             estimatedDestinationTimeDeltaMs,
+                            useExternalTimeEstimation,
                             estimatedVehicleMedianSpeedKmH
                         )
                     )
