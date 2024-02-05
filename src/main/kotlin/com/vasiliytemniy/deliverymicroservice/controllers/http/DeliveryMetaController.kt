@@ -53,8 +53,8 @@ class DeliveryMetaController(
         @RequestParam(name = "mass") mass: Int?,
         @RequestParam(name = "volume") volume: Int?,
         @RequestParam(name = "delivery-vehicle-type", defaultValue = "car") deliveryVehicleType: String,
-        @RequestParam(name = "estimated-dispatch-time-delta-hours", defaultValue = "0") estimatedDispatchTimeDeltaHours: Int,
-        @RequestParam(name = "estimated-destination-time-delta-hours", defaultValue = "0") estimatedDestinationTimeDeltaHours: Int,
+        @RequestParam(name = "estimated-dispatch-time-delta-ms", defaultValue = "0") estimatedDispatchTimeDeltaMs: Long,
+        @RequestParam(name = "estimated-destination-time-delta-ms", defaultValue = "0") estimatedDestinationTimeDeltaMs: Long,
         @RequestParam(name = "estimated-vehicle-median-speed-km-h") estimatedVehicleMedianSpeedKmH: Int?
     ): ResponseEntity<SuccessDeliveryMetaResponse> =
         withTimeout(TIMEOUT_MILLIS) {
@@ -82,8 +82,8 @@ class DeliveryMetaController(
                         ),
                         DeliveryTimeParamsDto(
                             DeliveryVehicleType.fromValue(deliveryVehicleType),
-                            estimatedDispatchTimeDeltaHours,
-                            estimatedDestinationTimeDeltaHours,
+                            estimatedDispatchTimeDeltaMs,
+                            estimatedDestinationTimeDeltaMs,
                             estimatedVehicleMedianSpeedKmH
                         )
                     )

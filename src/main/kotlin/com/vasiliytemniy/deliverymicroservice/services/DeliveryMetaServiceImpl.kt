@@ -52,7 +52,7 @@ class DeliveryMetaServiceImpl(
                     requestDto.deliveryCostParams,
                     distanceInMeters
                 ),
-                estimatedDeliveryHours = null
+                estimatedDeliveryMs = null
             )
         }
 
@@ -70,7 +70,7 @@ class DeliveryMetaServiceImpl(
             // Early return
             return  DeliveryMeta(
                 cost = null,
-                estimatedDeliveryHours = calculateEstimatedDeliveryTime(
+                estimatedDeliveryMs = calculateEstimatedDeliveryTimeMs(
                     requestDto.deliveryTimeParams,
                     distanceInMeters
                 )
@@ -88,7 +88,7 @@ class DeliveryMetaServiceImpl(
                     requestDto.deliveryCostParams,
                     distanceInMeters
                 ),
-                estimatedDeliveryHours = calculateEstimatedDeliveryTime(
+                estimatedDeliveryMs = calculateEstimatedDeliveryTimeMs(
                     requestDto.deliveryTimeParams,
                     distanceInMeters
                 )
@@ -157,7 +157,10 @@ class DeliveryMetaServiceImpl(
             distance
         }
 
-    private fun calculateEstimatedDeliveryTime(timeParams: DeliveryTimeParamsDto, distanceInMeters: Int): Int {
+    /**
+     * Returns estimated delivery time in milliseconds
+     */
+    private fun calculateEstimatedDeliveryTimeMs(timeParams: DeliveryTimeParamsDto, distanceInMeters: Int): Long {
         val estimatedMedianSpeedKmH = timeParams.estimatedVehicleMedianSpeedKmH?:
             when (timeParams.deliveryVehicleType) {
                 DeliveryVehicleType.CAR -> 70
@@ -168,12 +171,11 @@ class DeliveryMetaServiceImpl(
                 DeliveryVehicleType.BICYCLE -> 20
             }
 
-        println("estimatedMedianSpeedKmH: $estimatedMedianSpeedKmH, distanceInMeters: $distanceInMeters")
-        println("result " + ((distanceInMeters / 1000) / estimatedMedianSpeedKmH) +
-                timeParams.estimatedDispatchTimeDeltaHours + timeParams.estimatedDestinationTimeDeltaHours)
+        // Meters in millisecond
+        val estimatedMedianSpeedMMs = estimatedMedianSpeedKmH.toDouble() / (60 * 60).toDouble()
 
-        return ((distanceInMeters / 1000) / estimatedMedianSpeedKmH) +
-                timeParams.estimatedDispatchTimeDeltaHours + timeParams.estimatedDestinationTimeDeltaHours
+        return ((distanceInMeters.toDouble()) / estimatedMedianSpeedMMs).toLong() +
+                timeParams.estimatedDispatchTimeDeltaMs + timeParams.estimatedDestinationTimeDeltaMs
     }
 
     private fun calculateDeliveryCost(costParams: DeliveryCostParamsDto, distanceInMeters: Int?): Int {
