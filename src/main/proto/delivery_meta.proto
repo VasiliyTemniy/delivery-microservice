@@ -9,7 +9,7 @@ service DeliveryMetaService {
 
 message DeliveryMetaData {
   optional int32 cost = 1;
-  optional string expectedDeliveryAt = 2;
+  optional int32 estimatedDeliveryHours = 2;
 }
 
 // Currency is not needed here - cost calculation is abstract for given costs
