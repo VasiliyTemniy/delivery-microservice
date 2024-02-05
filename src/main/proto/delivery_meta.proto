@@ -34,7 +34,8 @@ message DeliveryTimeParams {
   string deliveryVehicleType = 1; // "car", "truck", "plane", "train", "ship", "bicycle"
   int64 estimatedDispatchTimeDeltaMs = 2; // sort, prepare, load, etc
   int64 estimatedDestinationTimeDeltaMs = 3; // unload, prepare, sort, etc
-  optional int32 estimatedVehicleMedianSpeedKmH = 4;
+  bool useExternalTimeEstimation = 4;
+  optional int32 estimatedVehicleMedianSpeedKmH = 5;
 }
 
 
