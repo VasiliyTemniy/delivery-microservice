@@ -28,7 +28,7 @@ class DeliveryMetaController(
     val deliveryMetaService: DeliveryMetaService
 ) {
 
-    @GetMapping(path = ["/"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     @Operation(
         method = "calculateDeliveryMeta",
         summary = "Calculate delivery meta",
@@ -39,7 +39,7 @@ class DeliveryMetaController(
         @RequestParam(name = "meta-calculation-type", defaultValue = "cost_and_estimated_time") metaCalculationType: String,
         @RequestParam(name = "from-address") fromAddress: String?,
         @RequestParam(name = "to-address") toAddress: String?,
-        @RequestParam(name = "cost-calculation-types", defaultValue = """["fixed", "distance"]""") costCalculationTypes: List<String>,
+        @RequestParam(name = "cost-calculation-types") costCalculationTypes: List<String>?,
         @RequestParam(name = "fixed-cost-addon") fixedCostAddon: Int?,
         @RequestParam(name = "distance-step-cost") distanceStepCost: Int?,
         @RequestParam(name = "distance-step-quantity") distanceStepQuantity: Int?,
@@ -66,7 +66,7 @@ class DeliveryMetaController(
                         fromAddress,
                         toAddress,
                         DeliveryCostParamsDto(
-                            costCalculationTypes.map { DeliveryCostCalculationType.fromValue(it) },
+                            (costCalculationTypes?:emptyList()).map { DeliveryCostCalculationType.fromValue(it) },
                             fixedCostAddon,
                             distanceStepCost,
                             distanceStepQuantity,
