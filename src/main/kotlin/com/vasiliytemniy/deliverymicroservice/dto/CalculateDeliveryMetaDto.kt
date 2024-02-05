@@ -74,8 +74,8 @@ fun DeliveryCostParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryCostPara
 fun DeliveryTimeParamsDto.Companion.of(messageObj: DeliveryMeta.DeliveryTimeParams): DeliveryTimeParamsDto {
     return DeliveryTimeParamsDto(
         deliveryVehicleType = DeliveryVehicleType.fromValue(messageObj.deliveryVehicleType),
-        estimatedDispatchTimeDeltaHours = messageObj.estimatedDispatchTimeDeltaMs,
-        estimatedDestinationTimeDeltaHours = messageObj.estimatedDestinationTimeDeltaMs,
+        estimatedDispatchTimeDeltaHours = messageObj.estimatedDispatchTimeDeltaHours,
+        estimatedDestinationTimeDeltaHours = messageObj.estimatedDestinationTimeDeltaHours,
         estimatedVehicleMedianSpeedKmH = messageObj.estimatedVehicleMedianSpeedKmH
     )
 }
