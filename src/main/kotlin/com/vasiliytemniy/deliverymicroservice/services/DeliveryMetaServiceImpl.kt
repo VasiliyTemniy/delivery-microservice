@@ -2,10 +2,7 @@ package com.vasiliytemniy.deliverymicroservice.services
 
 import com.google.common.net.HttpHeaders
 import com.vasiliytemniy.deliverymicroservice.domain.*
-import com.vasiliytemniy.deliverymicroservice.dto.CalculateDeliveryMetaDto
-import com.vasiliytemniy.deliverymicroservice.dto.DeliveryCostParamsDto
-import com.vasiliytemniy.deliverymicroservice.dto.DeliveryTimeParamsDto
-import com.vasiliytemniy.deliverymicroservice.dto.GeocodingPoint
+import com.vasiliytemniy.deliverymicroservice.dto.*
 import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -122,8 +119,7 @@ class DeliveryMetaServiceImpl(
                 webClient.get()
                     .uri("https://graphhopper.com/api/1/geocode?q=$fromAddress&key=$graphhopperApiKey")
                     .exchangeToMono { clientResponse ->
-                        println("Response Headers: ${clientResponse.headers().asHttpHeaders()}")
-                        clientResponse.bodyToMono(String::class.java)
+                        clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
                     }
                     .awaitFirst()
             }
@@ -132,16 +128,12 @@ class DeliveryMetaServiceImpl(
                 webClient.get()
                     .uri("https://graphhopper.com/api/1/geocode?q=$toAddress&key=$graphhopperApiKey")
                     .exchangeToMono { clientResponse ->
-                        println("Response Headers: ${clientResponse.headers().asHttpHeaders()}")
-                        clientResponse.bodyToMono(String::class.java)
+                        clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
                     }
                     .awaitFirst()
             }
 
-            println("from: ${from.await()}")
-            println("to: ${to.await()}")
-
-            TODO("Not yet implemented")
+            Pair(from.await().hits.first().point, to.await().hits.first().point)
         }
 
     private suspend fun requestPathDistance(fromPoint: GeocodingPoint, toPoint: GeocodingPoint): Int =
@@ -151,15 +143,18 @@ class DeliveryMetaServiceImpl(
                 webClient.get()
                     .uri("https://graphhopper.com/api/1/route?point=${fromPoint.lat},${fromPoint.lng}&point=${toPoint.lat},${toPoint.lng}&key=$graphhopperApiKey")
                     .exchangeToMono { clientResponse ->
-                        println("Response Headers: ${clientResponse.headers().asHttpHeaders()}")
-                        clientResponse.bodyToMono(String::class.java)
+                        clientResponse.bodyToMono(GraphhopperRouteResponse::class.java)
                     }
                     .awaitFirst()
             }
 
-            println("response: ${response.await()}")
+            var distance = 0
 
-            TODO("Not yet implemented")
+            for (path in response.await().paths) {
+                distance += path.distance.toInt()
+            }
+
+            distance
         }
 
     private fun calculateEstimatedDeliveryTime(timeParams: DeliveryTimeParamsDto, distanceInMeters: Int): Int {
@@ -173,11 +168,19 @@ class DeliveryMetaServiceImpl(
                 DeliveryVehicleType.BICYCLE -> 20
             }
 
+        println("estimatedMedianSpeedKmH: $estimatedMedianSpeedKmH, distanceInMeters: $distanceInMeters")
+        println("result " + ((distanceInMeters / 1000) / estimatedMedianSpeedKmH) +
+                timeParams.estimatedDispatchTimeDeltaHours + timeParams.estimatedDestinationTimeDeltaHours)
+
         return ((distanceInMeters / 1000) / estimatedMedianSpeedKmH) +
                 timeParams.estimatedDispatchTimeDeltaHours + timeParams.estimatedDestinationTimeDeltaHours
     }
 
     private fun calculateDeliveryCost(costParams: DeliveryCostParamsDto, distanceInMeters: Int?): Int {
+
+        if (costParams.calculationTypes.isEmpty()) {
+            throw IllegalArgumentException("Calculation types cannot be empty if cost calculation is needed")
+        }
 
         var cost = 0
 
