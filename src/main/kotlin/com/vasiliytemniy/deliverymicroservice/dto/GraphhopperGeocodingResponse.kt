@@ -1,5 +1,7 @@
 package com.vasiliytemniy.deliverymicroservice.dto
 
+import com.fasterxml.jackson.annotation.JsonProperty
+
 
 data class GraphhopperGeocodingResponse (
     val hits: List<GraphhopperGeocodingResponseHit>,
@@ -8,16 +10,19 @@ data class GraphhopperGeocodingResponse (
 
 data class GraphhopperGeocodingResponseHit (
     val point: GeocodingPoint,
-    val osmId: Int,
+    @JsonProperty("osm_id")
+    val osmId: String,
+    @JsonProperty("osm_type")
     val osmType: String,
+    @JsonProperty("osm_key")
     val osmKey: String,
-    val name: String,
-    val country: String,
-    val city: String,
-    val state: String,
-    val street: String,
-    val housenumber: String,
-    val postcode: String
+    val name: String?,
+    val country: String?,
+    val city: String?,
+    val state: String?,
+    val street: String?,
+    val housenumber: String?,
+    val postcode: String?
 )
 
 data class GeocodingPoint (
