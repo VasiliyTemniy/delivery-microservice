@@ -7,7 +7,8 @@ enum class DeliveryVehicleType(val value: String) {
     PLANE("plane"),
     TRAIN("train"),
     SHIP("ship"),
-    BICYCLE("bicycle");
+    BICYCLE("bicycle"),
+    SCOOTER("scooter");
 
     override fun toString(): String {
         return super.toString().lowercase()
@@ -22,6 +23,7 @@ enum class DeliveryVehicleType(val value: String) {
                 "train" -> TRAIN
                 "ship" -> SHIP
                 "bicycle" -> BICYCLE
+                "scooter" -> SCOOTER
                 else -> throw IllegalArgumentException()
             }
         }
