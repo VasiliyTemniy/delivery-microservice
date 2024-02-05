@@ -6,17 +6,17 @@ import java.time.LocalDateTime
 
 data class DeliveryMeta(
     val cost: Int?,
-    val expectedDeliveryAt: LocalDateTime?
+    val estimatedDeliveryHours: Int?
 )
 
 fun DeliveryMeta.toProto(): DeliveryMetaData {
     return DeliveryMetaData.newBuilder()
         .setCost(cost?:0)
-        .setExpectedDeliveryAt(expectedDeliveryAt?.toString())
+        .setEstimatedDeliveryHours(estimatedDeliveryHours?:0)
         .build()
 }
 
 fun DeliveryMeta.toSuccessHttpResponse() = SuccessDeliveryMetaResponse(
     cost = cost,
-    expectedDeliveryAt = expectedDeliveryAt?.toString()
+    estimatedDeliveryHours = estimatedDeliveryHours
 )
