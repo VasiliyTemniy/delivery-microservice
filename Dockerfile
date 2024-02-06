@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 azul/zulu-openjdk-alpine:21 as builder
+FROM azul/zulu-openjdk-alpine:21 as builder
 ARG JAR_FILE=target/delivery-microservice-0.9.0-SNAPSHOT.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
