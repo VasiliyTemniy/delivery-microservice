@@ -21,7 +21,7 @@ import java.time.Duration
  */
 @Service
 class DeliveryMetaServiceImpl(
-//    private val redisRepository: RedisCacheRepository
+    private val redisRepository: RedisCacheRepository
 ): DeliveryMetaService {
 
 
