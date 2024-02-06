@@ -83,7 +83,7 @@ jobs:
         IS_DOCKERIZED: true
         TEST_FLYWAY_URL: jdbc:postgresql://localhost:5432/postgres_db_github
         FLYWAY_SCHEMA: '["delivery"]'
-        GRAPHHOPPER_API_KEY: ${{ secrets.GRAPHHOPPER_API_KEY }}
+        GRAPHHOPPER_API_KEY: ${{ secrets.GRAPHHOPPER_API_SECRET_KEY }}
         REDIS_HOST: localhost
         REDIS_PORT: 6379
         REDIS_TIMEOUT: 5000
