@@ -24,8 +24,13 @@ class DeliveryMetaServiceImpl(
     private val redisRepository: RedisCacheRepository
 ): DeliveryMetaService {
 
+    private val dotenvInstance = dotenv { ignoreIfMissing = true }
 
-    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+    private val isDockerized = dotenvInstance["IS_DOCKERIZED"]
+
+    private val graphhopperApiKey =
+        if (isDockerized == "true") dotenvInstance["GRAPHHOPPER_API_KEY_DOCKER"]
+        else System.getenv("GRAPHHOPPER_API_KEY")
 
 //    private var graphhopperApiKey: String? = ""
 //
