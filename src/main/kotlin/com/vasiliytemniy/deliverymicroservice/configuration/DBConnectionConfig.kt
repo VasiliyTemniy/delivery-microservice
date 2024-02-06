@@ -21,10 +21,19 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
     @Override
     @Bean
     override fun connectionFactory(): ConnectionPool {
-        val name = dotenvInstance["R2DBC_NAME"]
-        val password = dotenvInstance["R2DBC_PASSWORD"]
-        val username = dotenvInstance["R2DBC_USERNAME"]
-        val url = dotenvInstance["R2DBC_URL"]
+        val kotlinEnv = dotenvInstance["KOTLIN_ENV"]
+        val name =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_NAME"]
+            else dotenvInstance["R2DBC_NAME"]
+        val password =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_PASSWORD"]
+            else dotenvInstance["R2DBC_PASSWORD"]
+        val username =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_USERNAME"]
+            else dotenvInstance["R2DBC_USERNAME"]
+        val url =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_URL"]
+            else dotenvInstance["R2DBC_URL"]
         val maxPoolSize = dotenvInstance["R2DBC_POOL_MAX_SIZE"]
         val initialPoolSize = dotenvInstance["R2DBC_POOL_INITIAL_SIZE"]
 
