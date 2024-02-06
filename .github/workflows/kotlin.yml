@@ -76,7 +76,7 @@ jobs:
         TEST_R2DBC_NAME: postgres_db_github
         TEST_R2DBC_PASSWORD: postgres_password
         TEST_R2DBC_USERNAME: postgres_user
-        TEST_R2DBC_URL: r2dbc:postgresql://host.docker.internal:5432/postgres_db_github
+        TEST_R2DBC_URL: r2dbc:postgresql://localhost:5432/postgres_db_github
         TEST_R2DBC_SSL: false
         R2DBC_POOL_MAX_SIZE: 30
         R2DBC_POOL_INITIAL_SIZE: 20
