@@ -14,7 +14,17 @@ jobs:
     runs-on: ubuntu-20.04
     environment: testing_env
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: 21
+        distribution: 'zulu'
+        architecture: x64
+        cache: maven
+
+    - name: Build
+      run: mvn install -Dmaven.test.skip=true
 
     - name: Build docker image
       run: make docker-image
@@ -49,15 +59,14 @@ jobs:
           - 6379:6379
 
     steps:
-    - uses: actions/checkout@v3
-
+    - uses: actions/checkout@v4
     - name: Set up JDK 21
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
         java-version: 21
-
-    - name: Grant execute permission for maven
-      run: chmod +x maven
+        distribution: 'zulu'
+        architecture: x64
+        cache: maven
 
     - name: Build
       run: mvn clean compile
