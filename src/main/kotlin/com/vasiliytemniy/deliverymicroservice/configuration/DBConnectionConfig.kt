@@ -34,6 +34,9 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
         val url =
             if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_URL"]
             else dotenvInstance["R2DBC_URL"]
+        val ssl =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_SSL"]
+            else dotenvInstance["R2DBC_SSL"]
         val maxPoolSize = dotenvInstance["R2DBC_POOL_MAX_SIZE"]
         val initialPoolSize = dotenvInstance["R2DBC_POOL_INITIAL_SIZE"]
 
@@ -43,6 +46,7 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
             .option(ConnectionFactoryOptions.DATABASE, name)
             .option(ConnectionFactoryOptions.USER, username)
             .option(ConnectionFactoryOptions.PASSWORD, password)
+            .option(ConnectionFactoryOptions.SSL, ssl.toBoolean())
             .build()
 
         val baseConnectionFactory = ConnectionFactories.get(connectionOptions)
