@@ -10,12 +10,12 @@ data class GraphhopperGeocodingResponse (
 
 data class GraphhopperGeocodingResponseHit (
     val point: GeocodingPoint,
-    @JsonProperty("osm_id")
-    val osmId: String,
-    @JsonProperty("osm_type")
-    val osmType: String,
-    @JsonProperty("osm_key")
-    val osmKey: String,
+//    @JsonProperty("osm_id")
+//    val osmId: String,
+//    @JsonProperty("osm_type")
+//    val osmType: String,
+//    @JsonProperty("osm_key")
+//    val osmKey: String,
     val name: String?,
     val country: String?,
     val city: String?,
