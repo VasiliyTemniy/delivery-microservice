@@ -31,7 +31,7 @@ Uses Spring Boot, Project Reactor, Kotlin coroutines and gRPC.
     - GET "/flow/by-carrier-id/{carrierId}"  returns Flow (optional param filterActive)
     - GET "/by-order-id/{orderId}"           returns Page
     - GET "/by-carrier-id/{carrierId}"       returns Page (optional param filterActive)
-    - GET "/by-filters **"                      returns Page (filters accepted as url-encoded JSON via request params)
+    - GET "/by-filters **"                   returns Page (filters accepted as url-encoded JSON via request params)
     - PUT "/status"                          returns List (updates status for multiple entities)
     - PUT "/reorder"                         returns List (swaps pointNumbers accordingly to request body)
     - PUT "/"                                returns single Entity (updates all single order tracking fields)
