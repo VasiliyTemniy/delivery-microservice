@@ -26,11 +26,7 @@ class DeliveryMetaServiceImpl(
 
     private val dotenvInstance = dotenv { ignoreIfMissing = true }
 
-    private val isDockerized = dotenvInstance["IS_DOCKERIZED"]
-
-    private val graphhopperApiKey =
-        if (isDockerized == "true") dotenvInstance["GRAPHHOPPER_API_KEY_DOCKER"]
-        else System.getenv("GRAPHHOPPER_API_KEY")
+    private val graphhopperApiKey = dotenvInstance["GRAPHHOPPER_API_KEY_DOCKER"]
 
 
     @Value("\${spring.application.name}")
