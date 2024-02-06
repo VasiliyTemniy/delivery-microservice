@@ -24,6 +24,9 @@ services:
       - FLYWAY_SCHEMA=["delivery"]
       - GRAPHHOPPER_API_KEY=${GRAPHHOPPER_API_KEY}
       - IS_DOCKERIZED=true
+      - REDIS_HOST=host.docker.internal
+      - REDIS_PORT=6379
+      - REDIS_TIMEOUT=5000
     depends_on:
       - postgresql
     networks: [ "microservice" ]
@@ -46,6 +49,14 @@ services:
     command: -p 5432
     volumes:
       - ./postgresql/data:/var/lib/postgresql/data
+    networks: [ "microservice" ]
+
+  redis:
+    image: redis:7.2.4-alpine3.19
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
     networks: [ "microservice" ]
 
 networks:
