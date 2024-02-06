@@ -25,7 +25,7 @@ class DeliveryMetaServiceImpl(
 ): DeliveryMetaService {
 
 
-    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+//    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
 
 //    private var graphhopperApiKey: String? = ""
 //
@@ -38,13 +38,13 @@ class DeliveryMetaServiceImpl(
 //        }
 //    }
 
-    @Value("\${spring.application.name}")
-    private val applicationName: String? = null
-
-    private val webClient = WebClient.builder()
-        .defaultHeader(HttpHeaders.USER_AGENT, "$applicationName")
-        .defaultHeader(HttpHeaders.REFERER, "https://github.com/vasiliytemniy/delivery-microservice")
-        .build()
+//    @Value("\${spring.application.name}")
+//    private val applicationName: String? = null
+//
+//    private val webClient = WebClient.builder()
+//        .defaultHeader(HttpHeaders.USER_AGENT, "$applicationName")
+//        .defaultHeader(HttpHeaders.REFERER, "https://github.com/vasiliytemniy/delivery-microservice")
+//        .build()
 
 
     // DEBUG! TODO: remove it
