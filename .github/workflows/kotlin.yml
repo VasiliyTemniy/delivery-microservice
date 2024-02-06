@@ -1,0 +1,81 @@
+name: delivery-microservice-pipeline
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-docker-test:
+    runs-on: ubuntu-20.04
+    environment: testing_env
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build docker image
+      run: make docker-image
+
+
+  app-test:
+    runs-on: ubuntu-20.04
+    environment: testing_env
+    services:
+      postgres:
+        image: postgres:16.1-alpine3.19
+        env:
+          POSTGRES_DB: postgres_db_github
+          POSTGRES_PASSWORD: postgres_password
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres_user
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.2.4-alpine3.19
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v1
+      with:
+        java-version: 21
+
+    - name: Grant execute permission for maven
+      run: chmod +x maven
+
+    - name: Build
+      run: mvn clean compile
+
+    - name: Test
+      run: make test
+      env:
+        KOTLIN_ENV: test-prod
+        TEST_R2DBC_NAME: postgres_db_github
+        TEST_R2DBC_PASSWORD: postgres_password
+        TEST_R2DBC_USERNAME: postgres_user
+        TEST_R2DBC_URL: r2dbc:postgresql://host.docker.internal:5432/postgres_db_github
+        R2DBC_POOL_MAX_SIZE: 30
+        R2DBC_POOL_INITIAL_SIZE: 20
+        IS_DOCKERIZED: true
+        FLYWAY_URL: jdbc:postgresql://localhost:5432/delivery
+        FLYWAY_SCHEMA: '["delivery"]'
+        GRAPHHOPPER_API_KEY: ${{ secrets.GRAPHHOPPER_API_KEY }}
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+        REDIS_TIMEOUT: 5000
