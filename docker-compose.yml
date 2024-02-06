@@ -23,6 +23,7 @@ services:
       - FLYWAY_URL=jdbc:postgresql://host.docker.internal:5433/delivery
       - FLYWAY_SCHEMA=["delivery"]
       - GRAPHHOPPER_API_KEY=${GRAPHHOPPER_API_KEY}
+      - IS_DOCKERIZED=true
     depends_on:
       - postgresql
     networks: [ "microservice" ]
