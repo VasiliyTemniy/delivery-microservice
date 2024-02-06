@@ -3,6 +3,12 @@ package com.vasiliytemniy.deliverymicroservice.dto
 import com.fasterxml.jackson.annotation.JsonProperty
 
 
+data class RouteMeta(
+    val distance: Double,
+    val time: Long
+)
+
+
 data class GraphhopperRouteResponse(
     val paths: List<GraphhopperRouteResponsePath>,
     val info: GraphhopperRouteResponseInfo
