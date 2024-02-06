@@ -3,6 +3,7 @@ package com.vasiliytemniy.deliverymicroservice.services
 import com.google.common.net.HttpHeaders
 import com.vasiliytemniy.deliverymicroservice.domain.*
 import com.vasiliytemniy.deliverymicroservice.dto.*
+import com.vasiliytemniy.deliverymicroservice.repositories.RedisCacheRepository
 import io.github.cdimascio.dotenv.dotenv
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -12,15 +13,15 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 
 /**
- * TODO: add redis caching;
  * TODO: add different distance calculation for vehicle === plane / train / ship
  */
 @Service
 class DeliveryMetaServiceImpl(
-    //TODO add redis caching! Redis Repository inject here
+    private val redisRepository: RedisCacheRepository
 ): DeliveryMetaService {
 
 
@@ -36,6 +37,12 @@ class DeliveryMetaServiceImpl(
 
     override suspend fun calculateDeliveryMeta(requestDto: CalculateDeliveryMetaDto): DeliveryMeta {
 
+        // T.O.D.O.: Check if hash as key is going to give errors or unwanted duplicates
+        val cachedResult = redisRepository.getKey(requestDto.hashCode().toString(), DeliveryMeta::class.java)
+        if (cachedResult != null) {
+            return cachedResult
+        }
+
         if (requestDto.metaCalculationType == DeliveryMetaCalculationType.ONLY_COST) {
             if (requestDto.deliveryCostParams == null) {
                 throw IllegalArgumentException("Delivery cost params should not be null for 'only cost' calculation")
@@ -48,17 +55,22 @@ class DeliveryMetaServiceImpl(
                 if (requestDto.fromAddress == null || requestDto.toAddress == null) {
                     throw IllegalArgumentException("From and to addresses should not be null for distance-based delivery cost calculation")
                 }
-                distanceInMeters = getRouteMeta(requestDto.fromAddress, requestDto.toAddress, null).first
+                distanceInMeters = getRouteMeta(requestDto.fromAddress, requestDto.toAddress, null).distance
             }
 
-            // Early return
-            return DeliveryMeta(
+            val result = DeliveryMeta(
                 cost = calculateDeliveryCost(
                     requestDto.deliveryCostParams,
                     distanceInMeters?.toInt()
                 ),
                 estimatedDeliveryMs = null
             )
+
+            // T.O.D.O.: Check if hash as key is going to give errors or unwanted duplicates
+            redisRepository.setKey(requestDto.hashCode().toString(), result)
+
+            // Early return
+            return result
         }
 
         // If requestDto.metaCalculationType != DeliveryMetaCalculationType.ONLY_COST then from and to addresses should not be null
@@ -83,11 +95,16 @@ class DeliveryMetaServiceImpl(
                 calculateEstimatedDeliveryTimeMs(requestDto.deliveryTimeParams, distanceInMeters.toInt())
             }
 
-            // Early return
-            return  DeliveryMeta(
+            val result = DeliveryMeta(
                 cost = null,
                 estimatedDeliveryMs = estimatedDeliveryMs
             )
+
+            // T.O.D.O.: Check if hash as key is going to give errors or unwanted duplicates
+            redisRepository.setKey(requestDto.hashCode().toString(), result)
+
+            // Early return
+            return result
         }
 
         if (requestDto.metaCalculationType == DeliveryMetaCalculationType.COST_AND_ESTIMATED_TIME) {
@@ -101,14 +118,19 @@ class DeliveryMetaServiceImpl(
                 calculateEstimatedDeliveryTimeMs(requestDto.deliveryTimeParams, distanceInMeters.toInt())
             }
 
-            // Early return
-            return  DeliveryMeta(
+            val result = DeliveryMeta(
                 cost = calculateDeliveryCost(
                     requestDto.deliveryCostParams,
                     distanceInMeters.toInt()
                 ),
                 estimatedDeliveryMs = estimatedDeliveryMs
             )
+
+            // T.O.D.O.: Check if hash as key is going to give errors or unwanted duplicates
+            redisRepository.setKey(requestDto.hashCode().toString(), result)
+
+            // Early return
+            return result
         }
 
         throw IllegalArgumentException("Unknown meta calculation type: ${requestDto.metaCalculationType}")
@@ -118,16 +140,16 @@ class DeliveryMetaServiceImpl(
         fromAddress: String,
         toAddress: String,
         vehicleType: DeliveryVehicleType?
-    ): Pair<Double, Long> {
+    ): RouteMeta {
 
         if (fromAddress == toAddress) {
-            return Pair(0.0, 0)
+            return RouteMeta(0.0, 0)
         }
 
         val (from, to) = requestGeocoding(fromAddress, toAddress)
 
         if (from == to) {
-            return Pair(0.0, 0)
+            return RouteMeta(0.0, 0)
         }
 
         return requestRouteMeta(from, to, vehicleType)
@@ -138,25 +160,56 @@ class DeliveryMetaServiceImpl(
      */
     private suspend fun requestGeocoding(fromAddress: String, toAddress: String): Pair<GeocodingPoint, GeocodingPoint> =
         withContext(Dispatchers.IO) {
-            val from = async {
-                webClient.get()
-                    .uri("https://graphhopper.com/api/1/geocode?q=$fromAddress&key=$graphhopperApiKey")
-                    .exchangeToMono { clientResponse ->
-                        clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
-                    }
-                    .awaitFirst()
+
+            // Use separate caching for from and to - could be that one of them is cached while other is not
+            val fromCached = redisRepository.getKey(fromAddress, GeocodingPoint::class.java)
+            val toCached = redisRepository.getKey(toAddress, GeocodingPoint::class.java)
+
+            // Request only if from geocoding point is not cached
+            val from = if (fromCached == null) {
+                async {
+                    webClient.get()
+                        .uri("https://graphhopper.com/api/1/geocode?q=$fromAddress&key=$graphhopperApiKey")
+                        .exchangeToMono { clientResponse ->
+                            clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
+                        }
+                        .awaitFirst()
+                }
+            } else null
+
+            // Request only if to geocoding point is not cached
+            val to = if (toCached == null) {
+                async {
+                    webClient.get()
+                        .uri("https://graphhopper.com/api/1/geocode?q=$toAddress&key=$graphhopperApiKey")
+                        .exchangeToMono { clientResponse ->
+                            clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
+                        }
+                        .awaitFirst()
+                }
+            } else null
+
+            // If from and to geocoding points are requested and not null - use them because they are not cached, otherwise - use cached points
+            val fromPoint = from?.await()?.hits?.first()?.point ?: fromCached
+            val toPoint = to?.await()?.hits?.first()?.point ?: toCached
+
+            // Set from and to geocoding points to cache if they are not cached
+            if (fromCached == null) {
+                if (fromPoint != null) {
+                    redisRepository.setKey(fromAddress, fromPoint, externalRequestCacheTtl)
+                }
+            }
+            if (toCached == null) {
+                if (toPoint != null) {
+                    redisRepository.setKey(toAddress, toPoint, externalRequestCacheTtl)
+                }
             }
 
-            val to = async {
-                webClient.get()
-                    .uri("https://graphhopper.com/api/1/geocode?q=$toAddress&key=$graphhopperApiKey")
-                    .exchangeToMono { clientResponse ->
-                        clientResponse.bodyToMono(GraphhopperGeocodingResponse::class.java)
-                    }
-                    .awaitFirst()
+            if (fromPoint == null || toPoint == null) {
+                throw Error("Delivery meta service: requestGeocoding failed null checks on return while null checks passed before")
             }
 
-            Pair(from.await().hits.first().point, to.await().hits.first().point)
+            Pair(fromPoint, toPoint)
         }
 
     /**
@@ -166,7 +219,7 @@ class DeliveryMetaServiceImpl(
         fromPoint: GeocodingPoint,
         toPoint: GeocodingPoint,
         vehicleType: DeliveryVehicleType?
-    ): Pair<Double, Long> =
+    ): RouteMeta =
         withContext(Dispatchers.IO) {
 
             val requestProfileParam = when (vehicleType) {
@@ -176,6 +229,15 @@ class DeliveryMetaServiceImpl(
 //                DeliveryVehicleType.SCOOTER -> "scooter_delivery" // is not included in free plan
                 DeliveryVehicleType.FOOT -> "foot"
                 else -> "car"
+            }
+
+            // Check if cached result exists, return early if it does
+            val cachedResult = redisRepository.getKey(
+                "${fromPoint.lat},${fromPoint.lng}-${toPoint.lat},${toPoint.lng}-$requestProfileParam",
+                RouteMeta::class.java
+            )
+            if (cachedResult != null) {
+                return@withContext cachedResult
             }
 
             val response = async {
@@ -192,10 +254,15 @@ class DeliveryMetaServiceImpl(
 
             val routeResponse = response.await()
 
-            Pair(
+            RouteMeta(
                 routeResponse.paths.first().distance,
                 routeResponse.paths.first().time
-            )
+            ).also { redisRepository.setKey(
+                    "${fromPoint.lat},${fromPoint.lng}-${toPoint.lat},${toPoint.lng}-$requestProfileParam",
+                    it,
+                    externalRequestCacheTtl
+                )
+            }
         }
 
     /**
@@ -317,5 +384,6 @@ class DeliveryMetaServiceImpl(
 
     companion object {
         private val logger = LoggerFactory.getLogger(DeliveryMetaServiceImpl::class.java)
+        private val externalRequestCacheTtl: Duration = Duration.parse("P1DT0H0M")
     }
 }
