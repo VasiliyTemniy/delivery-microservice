@@ -66,8 +66,8 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
             if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_USERNAME"]
             else dotenvInstance["R2DBC_USERNAME"]
         val url =
-            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_URL"]
-            else dotenvInstance["R2DBC_URL"]
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_FLYWAY_URL"]
+            else dotenvInstance["FLYWAY_URL"]
         val schema = dotenvInstance["FLYWAY_SCHEMA"]
 
         return Flyway.configure().dataSource(

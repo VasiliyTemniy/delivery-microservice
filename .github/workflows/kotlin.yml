@@ -83,7 +83,7 @@ jobs:
         R2DBC_POOL_MAX_SIZE: 30
         R2DBC_POOL_INITIAL_SIZE: 20
         IS_DOCKERIZED: true
-        FLYWAY_URL: jdbc:postgresql://localhost:5432/delivery
+        TEST_FLYWAY_URL: jdbc:postgresql://localhost:5432/postgres_db_github
         FLYWAY_SCHEMA: '["delivery"]'
         GRAPHHOPPER_API_KEY: ${{ secrets.GRAPHHOPPER_API_KEY }}
         REDIS_HOST: localhost
