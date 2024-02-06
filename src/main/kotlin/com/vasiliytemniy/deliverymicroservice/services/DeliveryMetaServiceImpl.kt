@@ -25,7 +25,18 @@ class DeliveryMetaServiceImpl(
 ): DeliveryMetaService {
 
 
-    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+//    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+
+    private var graphhopperApiKey: String = ""
+
+    init {
+        graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+        if (graphhopperApiKey == "" || graphhopperApiKey == null) {
+            logger.info("GRAPHHOPPER_API_KEY was not initialized")
+        } else {
+            logger.info("GRAPHHOPPER_API_KEY was initialized successfully")
+        }
+    }
 
     @Value("\${spring.application.name}")
     private val applicationName: String? = null
