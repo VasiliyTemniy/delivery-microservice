@@ -8,7 +8,6 @@ import org.redisson.api.RedissonReactiveClient
 import org.redisson.client.codec.StringCodec
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
-import java.util.concurrent.TimeUnit
 import java.time.Duration
 
 
@@ -55,7 +54,7 @@ class RedisCacheRepositoryImpl(
 
     companion object {
         private val log = LoggerFactory.getLogger(RedisCacheRepositoryImpl::class.java)
-        private val fixedTtlDuration = Duration.parse("P0DT0H30M")
+        private val fixedTtlDuration = Duration.parse("P0DT0H5M")
         private const val PREFIX = "delivery-microservice"
     }
 }
