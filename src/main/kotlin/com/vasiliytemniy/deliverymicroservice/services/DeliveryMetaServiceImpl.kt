@@ -25,7 +25,7 @@ class DeliveryMetaServiceImpl(
 ): DeliveryMetaService {
 
 
-//    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
 
 //    private var graphhopperApiKey: String? = ""
 //
