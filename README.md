@@ -6,6 +6,15 @@ Processes order tracking and calculates delivery metadata.
 
 Uses Spring Boot, Project Reactor, Kotlin coroutines and gRPC.
 
+### Stack
+| Field | Tools          |
+| --- |----------------|
+| Backend | Kotlin + Spring Boot |
+| API | gRPC + WebFlux(Project Reactor + Coroutine-based) |
+| Database | PostgreSQL + Spring Boot R2DBC |
+| Backend cache | Redis |
+| CI / (no CD atm) | Github actions |
+
 
 ### Goals
 
@@ -22,7 +31,7 @@ Uses Spring Boot, Project Reactor, Kotlin coroutines and gRPC.
     - GET "/flow/by-carrier-id/{carrierId}"  returns Flow (optional param filterActive)
     - GET "/by-order-id/{orderId}"           returns Page
     - GET "/by-carrier-id/{carrierId}"       returns Page (optional param filterActive)
-    - GET "/by-filters"                      returns Page (filters accepted as url-encoded JSON via request params)
+    - GET "/by-filters **"                      returns Page (filters accepted as url-encoded JSON via request params)
     - PUT "/status"                          returns List (updates status for multiple entities)
     - PUT "/reorder"                         returns List (swaps pointNumbers accordingly to request body)
     - PUT "/"                                returns single Entity (updates all single order tracking fields)
@@ -32,6 +41,7 @@ Uses Spring Boot, Project Reactor, Kotlin coroutines and gRPC.
     - POST "/populate-test-data"             returns Nothing (*)
 
     * - works only when system property "testEnvironment" is set to "test" or "testProduction"
+    ** - has a lot of request params; see src/main/kotlin/com.vasiliytemniy.deliverymicroservice/controllers/OrderTrackingCoroutineController.kt for reference
 ```
 
 - OrderTrackingReactiveController
@@ -52,17 +62,19 @@ Uses Spring Boot, Project Reactor, Kotlin coroutines and gRPC.
 - DeliveryMetaController
 
 ```
-    Under construction
+    Routes start with "/api/v1/delivery-meta":
+    - GET "*" returns single DeliveryMeta
+    * - has a lot of request params; see src/main/kotlin/com.vasiliytemniy.deliverymicroservice/controllers/DeliveryMetaController.kt for reference
 ```
 - DeliveryMetaGrpcService
 
 ```
-    Under construction
+    gRPC service for delivery meta calculation
+    Has all methods from DeliveryMetaController
+    see src/main/proto/delivery_meta.proto for reference
 ```
 
-### TODO:
 
-- Add dockerization
-- Add CI/CD pipeline
-- Use external geocoding and geolocation apis
-- Use Redis to cache some data
+Best regards to [Alexander Bryksin](https://github.com/AleksK1NG); thanks for his guides:
+- [Kotlin gRPC with Spring](https://dev.to/aleksk1ng/kotlin-grpc-with-spring-9np)
+- [Kotlin Spring WebFlux, R2DBC and Redisson microservice in k8s](https://dev.to/aleksk1ng/kotlin-spring-webflux-r2dbc-and-redisson-microservice-in-k8s-p98)

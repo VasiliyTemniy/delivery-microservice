@@ -21,10 +21,22 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
     @Override
     @Bean
     override fun connectionFactory(): ConnectionPool {
-        val name = dotenvInstance["R2DBC_NAME"]
-        val password = dotenvInstance["R2DBC_PASSWORD"]
-        val username = dotenvInstance["R2DBC_USERNAME"]
-        val url = dotenvInstance["R2DBC_URL"]
+        val kotlinEnv = dotenvInstance["KOTLIN_ENV"]
+        val name =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_NAME"]
+            else dotenvInstance["R2DBC_NAME"]
+        val password =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_PASSWORD"]
+            else dotenvInstance["R2DBC_PASSWORD"]
+        val username =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_USERNAME"]
+            else dotenvInstance["R2DBC_USERNAME"]
+        val url =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_URL"]
+            else dotenvInstance["R2DBC_URL"]
+        val ssl =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_SSL"]
+            else dotenvInstance["R2DBC_SSL"]
         val maxPoolSize = dotenvInstance["R2DBC_POOL_MAX_SIZE"]
         val initialPoolSize = dotenvInstance["R2DBC_POOL_INITIAL_SIZE"]
 
@@ -34,6 +46,7 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
             .option(ConnectionFactoryOptions.DATABASE, name)
             .option(ConnectionFactoryOptions.USER, username)
             .option(ConnectionFactoryOptions.PASSWORD, password)
+            .option(ConnectionFactoryOptions.SSL, ssl.toBoolean())
             .build()
 
         val baseConnectionFactory = ConnectionFactories.get(connectionOptions)
@@ -49,9 +62,16 @@ class DBConnectionConfig: AbstractR2dbcConfiguration() {
     @Override
     @Bean(initMethod = "migrate")
     fun flyway(): Flyway {
-        val password = dotenvInstance["R2DBC_PASSWORD"]
-        val username = dotenvInstance["R2DBC_USERNAME"]
-        val url = dotenvInstance["FLYWAY_URL"]
+        val kotlinEnv = dotenvInstance["KOTLIN_ENV"]
+        val password =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_PASSWORD"]
+            else dotenvInstance["R2DBC_PASSWORD"]
+        val username =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_R2DBC_USERNAME"]
+            else dotenvInstance["R2DBC_USERNAME"]
+        val url =
+            if (kotlinEnv == "test" || kotlinEnv == "test-prod") dotenvInstance["TEST_FLYWAY_URL"]
+            else dotenvInstance["FLYWAY_URL"]
         val schema = dotenvInstance["FLYWAY_SCHEMA"]
 
         return Flyway.configure().dataSource(

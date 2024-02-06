@@ -17,15 +17,17 @@ import java.time.Duration
 
 
 /**
- * TODO: add different distance calculation for vehicle === plane / train / ship
+ * T.O.D.O.: add different distance calculation for vehicle === plane / train / ship
  */
 @Service
 class DeliveryMetaServiceImpl(
     private val redisRepository: RedisCacheRepository
 ): DeliveryMetaService {
 
+    private val dotenvInstance = dotenv { ignoreIfMissing = true }
 
-    private val graphhopperApiKey = dotenv()["GRAPHHOPPER_API_KEY"]
+    private val graphhopperApiKey = dotenvInstance["GRAPHHOPPER_API_KEY_DOCKER"]
+
 
     @Value("\${spring.application.name}")
     private val applicationName: String? = null
